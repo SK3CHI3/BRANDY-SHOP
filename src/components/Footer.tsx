@@ -7,8 +7,8 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid md:grid-cols-4 gap-8">
           <div>
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
-              ArtistryHub
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent mb-4">
+              Brandy
             </h3>
             <p className="text-gray-400 mb-4">
               Connecting Kenyan artists with customers who value unique, personalized design.
@@ -52,7 +52,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-400 text-sm">
-              © 2024 ArtistryHub. All rights reserved.
+              © 2024 Brandy. All rights reserved.
             </div>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm">Privacy Policy</a>
