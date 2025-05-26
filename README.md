@@ -1,73 +1,46 @@
-# Welcome to your Lovable project
+# Brandy 🧢🎨  
+*Wear Creativity. Delivered.*
 
-## Project info
+Brandy is a Kenyan-based e-commerce platform connecting talented artists with customers through customizable merchandise and on-demand printing.
 
-**URL**: https://lovable.dev/projects/07d1c658-fba8-4faf-b255-10b4bb6b854f
+## 🚀 Features
+- 🎨 **Artist Marketplace** – Artists upload and sell designs on T-shirts, caps, mugs, etc.
+- ✍️ **Custom Design Requests** – Customers can request unique artwork from artists.
+- 🛠️ **Customization Studio** – Real-time product editor for personalized touches.
+- 📦 **Print-on-Demand Fulfillment** – From order to doorstep, we handle it all.
+- 💸 **M-Pesa + Card Payments** – Seamless checkout via Daraja & Stripe APIs.
+- 🧑‍🎨 **Artist Dashboard** – Manage designs, orders, earnings, and more.
+- 📈 **Admin Panel** – Monitor sales, verify artists, manage logistics.
 
-## How can I edit this code?
+## 🧠 Tech Stack
+- **Frontend**: React.js + Next.js  
+- **Backend**: Node.js + Express + PostgreSQL  
+- **Design Tool**: Fabric.js (2D) + Three.js (3D previews)  
+- **Payments**: Safaricom Daraja API, Stripe  
+- **Notifications**: Firebase, Twilio  
+- **Delivery**: Sendy API, Uber Connect, Boda Partners  
 
-There are several ways of editing your application.
+## 📊 Revenue Model
+| Source               | Example                             |
+|----------------------|-------------------------------------|
+| Artist Commission    | 15% from each product sold          |
+| Custom Design Fee    | 30% cut from artist’s earnings      |
+| Shipping Markup      | Profit from delivery charges        |
+| Premium Artist Plans | Paid visibility for featured artists|
 
-**Use Lovable**
+## 🧪 MVP Roadmap
+- [x] Artist onboarding & product upload
+- [x] Customer shopping & checkout
+- [ ] Custom design request flow
+- [ ] Admin dashboard integration
+- [ ] Print & delivery partnerships
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/07d1c658-fba8-4faf-b255-10b4bb6b854f) and start prompting.
+## 📬 Contact
+For collabs, partnerships, or demos:  
+📧 brandyshop.ke@gmail.com  
+🌐 [Live Site](https://brandyshop.netlify.app/)  
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+> Built to empower Kenyan creatives. Brandy is not just a shop—it’s a movement. 🇰🇪
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/07d1c658-fba8-4faf-b255-10b4bb6b854f) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
