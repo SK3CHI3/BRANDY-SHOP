@@ -1,5 +1,7 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useProducts, useCategories } from '@/hooks/useData';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -12,65 +14,24 @@ const Marketplace = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const categories = [
-    'all', 'T-Shirts', 'Hoodies', 'Caps', 'Mugs', 'Tank Tops', 'Accessories'
-  ];
+  const { categories } = useCategories();
+  const { products, loading: productsLoading } = useProducts({
+    category: selectedCategory !== 'all' ? selectedCategory : undefined
+  });
 
-  const products = [
-    {
-      id: 1,
-      title: "Swahili Proverbs Collection",
-      artist: "Amina Wanjiku",
-      price: 1500,
-      originalPrice: 2000,
-      category: "T-Shirts",
-      image: "/placeholder.svg",
-      rating: 4.8,
-      reviews: 156,
-      isPopular: true,
-      isFavorited: false,
-      inStock: true
-    },
-    {
-      id: 2,
-      title: "Mount Kenya Landscape",
-      artist: "David Kiplagat",
-      price: 2200,
-      category: "Hoodies",
-      image: "/placeholder.svg",
-      rating: 4.9,
-      reviews: 89,
-      isPopular: false,
-      isFavorited: true,
-      inStock: true
-    },
-    {
-      id: 3,
-      title: "Kenyan Coffee Art",
-      artist: "Grace Nyong'o",
-      price: 1300,
-      category: "Mugs",
-      image: "/placeholder.svg",
-      rating: 4.7,
-      reviews: 234,
-      isPopular: true,
-      isFavorited: false,
-      inStock: false
-    },
-    // Add more products...
-  ];
+
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         product.artist.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+                         (product.artist?.full_name || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       {/* Hero Banner */}
       <section className="bg-gradient-to-r from-orange-600 to-red-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -93,25 +54,26 @@ const Marketplace = () => {
               />
             </div>
           </div>
-          
+
           <div className="flex gap-4">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="px-4 py-2 border rounded-lg"
             >
+              <option value="all">All Categories</option>
               {categories.map(category => (
-                <option key={category} value={category}>
-                  {category === 'all' ? 'All Categories' : category}
+                <option key={category.id} value={category.id}>
+                  {category.name}
                 </option>
               ))}
             </select>
-            
+
             <Button variant="outline" size="sm">
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            
+
             <div className="flex border rounded-lg">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
@@ -132,73 +94,102 @@ const Marketplace = () => {
         </div>
 
         {/* Products Grid */}
-        <div className={`grid gap-6 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
-              {product.isPopular && (
-                <Badge className="absolute top-3 left-3 z-10 bg-yellow-500">
-                  Popular
-                </Badge>
-              )}
-              
-              <div className="aspect-square bg-gray-200 rounded-t-lg relative overflow-hidden">
-                <img src={product.image} alt={product.title} className="w-full h-full object-cover" />
-                <button className="absolute top-3 right-3 p-2 bg-white/80 rounded-full hover:bg-white">
-                  <Heart className={`h-4 w-4 ${product.isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
-                </button>
-              </div>
-              
-              <div className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <Badge variant="secondary" className="text-xs">
-                    {product.category}
-                  </Badge>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <span className="text-yellow-500">★</span>
-                    <span className="ml-1">{product.rating}</span>
-                    <span className="ml-1">({product.reviews})</span>
-                  </div>
-                </div>
-                
-                <h3 className="font-semibold text-gray-900 mb-1">{product.title}</h3>
-                
-                <div className="flex items-center text-sm text-gray-600 mb-3">
-                  <User className="h-4 w-4 mr-1" />
-                  <span>by {product.artist}</span>
-                </div>
-                
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-purple-600">KSh {product.price.toLocaleString()}</span>
-                    {product.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through">KSh {product.originalPrice.toLocaleString()}</span>
-                    )}
-                  </div>
-                  <span className={`text-sm ${product.inStock ? 'text-green-600' : 'text-red-600'}`}>
-                    {product.inStock ? 'In Stock' : 'Out of Stock'}
-                  </span>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button 
-                    className="flex-1" 
-                    disabled={!product.inStock}
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Buy Now
-                  </Button>
-                  <Button variant="outline" className="flex-1">
-                    Customize
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {filteredProducts.length === 0 && (
+        {productsLoading ? (
           <div className="text-center py-12">
-            <p className="text-gray-500">No products found matching your criteria.</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading products...</p>
+          </div>
+        ) : filteredProducts.length > 0 ? (
+          <div className={`grid gap-6 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+            {filteredProducts.map((product) => (
+              <Link key={product.id} to={`/product/${product.id}`} className="block">
+                <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow relative">
+                  {product.is_featured && (
+                    <Badge className="absolute top-3 left-3 z-10 bg-yellow-500">
+                      Featured
+                    </Badge>
+                  )}
+
+                  <div className="aspect-square bg-gray-200 rounded-t-lg relative overflow-hidden">
+                    <img
+                      src={product.image_url || '/placeholder.svg'}
+                      alt={product.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      className="absolute top-3 right-3 p-2 bg-white/80 rounded-full hover:bg-white"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // TODO: Toggle favorite
+                      }}
+                    >
+                      <Heart className="h-4 w-4 text-gray-600" />
+                    </button>
+                  </div>
+
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge variant="secondary" className="text-xs">
+                        {product.category?.name || 'Uncategorized'}
+                      </Badge>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <span className="text-yellow-500">★</span>
+                        <span className="ml-1">4.5</span>
+                        <span className="ml-1">(0)</span>
+                      </div>
+                    </div>
+
+                    <h3 className="font-semibold text-gray-900 mb-1">{product.title}</h3>
+
+                    <div className="flex items-center text-sm text-gray-600 mb-3">
+                      <User className="h-4 w-4 mr-1" />
+                      <span>by {product.artist?.full_name || 'Unknown Artist'}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold text-purple-600">KSh {product.price.toLocaleString()}</span>
+                        {product.original_price && product.original_price > product.price && (
+                          <span className="text-sm text-gray-500 line-through">KSh {product.original_price.toLocaleString()}</span>
+                        )}
+                      </div>
+                      <span className={`text-sm ${product.stock_quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        className="flex-1"
+                        disabled={product.stock_quantity === 0}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          // TODO: Add to cart
+                        }}
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Buy Now
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          // TODO: Navigate to custom studio
+                        }}
+                      >
+                        Customize
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-600">Try adjusting your search or filters</p>
           </div>
         )}
       </div>

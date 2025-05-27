@@ -1,8 +1,13 @@
+# Brandy Shop - Kenyan Creative Marketplace
+# Robots.txt file for SEO optimization
+
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -10,5 +15,28 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
 User-agent: *
 Allow: /
+Crawl-delay: 2
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+Disallow: /*.json$
+
+# Allow important pages
+Allow: /marketplace
+Allow: /artists
+Allow: /about
+Allow: /contact
+Allow: /how-it-works
+
+# Sitemap location
+Sitemap: https://brandy-shop.vercel.app/sitemap.xml
