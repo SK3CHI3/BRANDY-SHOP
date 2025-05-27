@@ -157,10 +157,10 @@ npm run test:coverage
 
 ## 🚀 Deployment
 
-### Vercel Deployment (Recommended)
-1. **Connect Repository**: Link your GitHub repo to Vercel
-2. **Environment Variables**: Add all env vars in Vercel dashboard
-3. **Build Settings**: 
+### Netlify Deployment (Recommended)
+1. **Connect Repository**: Link your GitHub repo to Netlify
+2. **Environment Variables**: Add all env vars in Netlify dashboard
+3. **Build Settings**:
    - Build Command: `npm run build`
    - Output Directory: `dist`
 4. **Deploy**: Automatic deployment on push to main

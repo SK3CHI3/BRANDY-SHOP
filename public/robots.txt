@@ -39,4 +39,4 @@ Allow: /contact
 Allow: /how-it-works
 
 # Sitemap location
-Sitemap: https://brandy-shop.vercel.app/sitemap.xml
+Sitemap: https://brandyshop.netlify.app/sitemap.xml

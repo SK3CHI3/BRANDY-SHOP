@@ -1,8 +1,11 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Footer = () => {
+  const { user, profile } = useAuth();
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -33,9 +36,22 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">For Artists</h4>
             <ul className="space-y-2 text-gray-400">
               <li><Link to="/artists" className="hover:text-white transition-colors">Join Platform</Link></li>
-              <li><Link to="/artist-studio" className="hover:text-white transition-colors">Artist Studio</Link></li>
-              <li><Link to="/upload-design" className="hover:text-white transition-colors">Upload Design</Link></li>
-              <li><Link to="/analytics" className="hover:text-white transition-colors">Analytics</Link></li>
+              {/* Protected artist-only links */}
+              {user && profile?.role === 'artist' && (
+                <>
+                  <li><Link to="/artist-studio" className="hover:text-white transition-colors">Artist Studio</Link></li>
+                  <li><Link to="/upload-design" className="hover:text-white transition-colors">Upload Design</Link></li>
+                  <li><Link to="/analytics" className="hover:text-white transition-colors">Analytics</Link></li>
+                </>
+              )}
+              {/* Show alternative links for non-artists */}
+              {(!user || profile?.role !== 'artist') && (
+                <>
+                  <li><span className="text-gray-500 cursor-not-allowed">Artist Studio (Login Required)</span></li>
+                  <li><span className="text-gray-500 cursor-not-allowed">Upload Design (Artist Only)</span></li>
+                  <li><span className="text-gray-500 cursor-not-allowed">Analytics (Artist Only)</span></li>
+                </>
+              )}
             </ul>
           </div>
 
@@ -43,7 +59,12 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-gray-400">
               <li><Link to="/contact" className="hover:text-white transition-colors">Help Center</Link></li>
-              <li><Link to="/order-tracking" className="hover:text-white transition-colors">Track Order</Link></li>
+              {/* Order tracking - available for logged in users */}
+              {user ? (
+                <li><Link to="/order-tracking" className="hover:text-white transition-colors">Track Order</Link></li>
+              ) : (
+                <li><span className="text-gray-500 cursor-not-allowed">Track Order (Login Required)</span></li>
+              )}
               <li><Link to="/size-guide" className="hover:text-white transition-colors">Size Guide</Link></li>
               <li><Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
             </ul>

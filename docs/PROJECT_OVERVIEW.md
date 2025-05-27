@@ -218,15 +218,15 @@ GET /payments/:id/status - Check payment status
 ## 🚀 Deployment & DevOps
 
 ### Hosting & Infrastructure
-- **Frontend**: Vercel with automatic deployments
+- **Frontend**: Netlify with automatic deployments
 - **Backend**: Supabase managed infrastructure
 - **Database**: PostgreSQL on Supabase
-- **CDN**: Vercel Edge Network
-- **Monitoring**: Vercel Analytics + Supabase Monitoring
+- **CDN**: Netlify Edge Network
+- **Monitoring**: Netlify Analytics + Supabase Monitoring
 
 ### CI/CD Pipeline
 ```
-GitHub → Vercel → Production
+GitHub → Netlify → Production
    ↓
 Automatic builds on push to main
 Type checking and linting
@@ -236,7 +236,7 @@ Performance audits
 
 ### Environment Management
 - **Development**: Local development with Supabase local
-- **Staging**: Preview deployments on Vercel
+- **Staging**: Preview deployments on Netlify
 - **Production**: Main branch auto-deployment
 
 ### Security Measures

@@ -99,12 +99,16 @@ const Header = () => {
               >
                 Artists
               </Link>
-              <a
-                href="#how-it-works"
-                className="text-gray-700 hover:text-orange-600 hover:bg-orange-50 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
+              <Link
+                to="/how-it-works"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive('/how-it-works')
+                    ? 'bg-orange-100 text-orange-700 shadow-sm'
+                    : 'text-gray-700 hover:text-orange-600 hover:bg-orange-50'
+                }`}
               >
                 How It Works
-              </a>
+              </Link>
             </nav>
           </div>
 

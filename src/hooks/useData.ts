@@ -507,12 +507,11 @@ export const useStats = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Fetch verified artist count from profiles table
+        // Fetch all artist count from profiles table (not just verified)
         const { count: artistCount, error: artistError } = await supabase
           .from('profiles')
           .select('*', { count: 'exact', head: true })
           .eq('role', 'artist')
-          .eq('is_verified', true)
 
         // Fetch active product count
         const { count: productCount, error: productError } = await supabase
@@ -520,25 +519,37 @@ export const useStats = () => {
           .select('*', { count: 'exact', head: true })
           .eq('is_active', true)
 
-        // Fetch completed order count
+        // Fetch total order count (all orders, not just completed)
         const { count: orderCount, error: orderError } = await supabase
           .from('orders')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'completed')
+
+        // Log the results for debugging
+        console.log('Stats Debug:', {
+          artistCount,
+          artistError,
+          productCount,
+          productError,
+          orderCount,
+          orderError
+        })
 
         // Use mock data if tables don't exist
         if (artistError?.code === '42P01' || productError?.code === '42P01' || orderError?.code === '42P01') {
+          console.log('Using mock data due to missing tables')
           setStats({
             artistCount: 15,
             productCount: 127,
             orderCount: 89
           })
         } else {
-          setStats({
+          const finalStats = {
             artistCount: artistCount || 0,
             productCount: productCount || 0,
             orderCount: orderCount || 0
-          })
+          }
+          console.log('Setting real stats:', finalStats)
+          setStats(finalStats)
         }
       } catch (error) {
         console.error('Error fetching stats:', error)

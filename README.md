@@ -1,7 +1,7 @@
 # 🎨 Brandy Shop - Kenyan Creative Marketplace
 *Empowering Artists. Celebrating Culture. Delivering Dreams.*
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-blue?style=for-the-badge)](https://brandy-shop.vercel.app)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-blue?style=for-the-badge)](https://brandyshop.netlify.app)
 [![GitHub Stars](https://img.shields.io/github/stars/SK3CHI3/brandy-shop?style=for-the-badge&logo=github)](https://github.com/SK3CHI3/brandy-shop)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
@@ -167,7 +167,7 @@ npm run dev
 ```
 
 ### For Artists
-1. **Sign Up** as an artist at [brandy-shop.vercel.app](https://brandy-shop.vercel.app)
+1. **Sign Up** as an artist at [brandyshop.netlify.app](https://brandyshop.netlify.app)
 2. **Complete your profile** with portfolio and skills
 3. **Upload your designs** and set pricing
 4. **Start earning** from your creativity!
@@ -209,7 +209,7 @@ We welcome contributions from developers, designers, and cultural enthusiasts!
 
 ### Business Inquiries
 - 📧 **Email**: brandyshop.ke@gmail.com
-- 🌐 **Live Site**: [brandy-shop.vercel.app](https://brandy-shop.vercel.app)
+- 🌐 **Live Site**: [brandyshop.netlify.app](https://brandyshop.netlify.app)
 - 💼 **LinkedIn**: [Brandy Shop Kenya](https://linkedin.com/company/brandy-shop)
 
 ### Technical Support
@@ -230,6 +230,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 [![Star on GitHub](https://img.shields.io/github/stars/SK3CHI3/brandy-shop?style=social)](https://github.com/SK3CHI3/brandy-shop)
 
-**[🌐 Visit Live Site](https://brandy-shop.vercel.app) | [📖 Read Documentation](docs/) | [🤝 Contribute](CONTRIBUTING.md)**
+**[🌐 Visit Live Site]() | [📖 Read Documentation](docs/) | [🤝 Contribute](CONTRIBUTING.md)**
 
 </div>
