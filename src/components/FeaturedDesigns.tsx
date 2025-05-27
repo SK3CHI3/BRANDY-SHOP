@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useProducts } from '@/hooks/useData';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { User, Heart, ShoppingCart, Star } from 'lucide-react';
+import { User, Heart, ShoppingCart, Star, Send, Palette } from 'lucide-react';
 
 const FeaturedDesigns = () => {
   const { products, loading } = useProducts({ featured: true });
@@ -134,11 +134,20 @@ const FeaturedDesigns = () => {
         )}
 
         <div className="text-center mt-10">
-          <Link to="/marketplace">
-            <Button size="lg" variant="outline" className="border-2 border-orange-600 text-orange-600 hover:bg-orange-50 hover:border-orange-700">
-              View All Designs
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link to="/marketplace">
+              <Button size="lg" variant="outline" className="border-2 border-orange-600 text-orange-600 hover:bg-orange-50 hover:border-orange-700 w-full sm:w-auto">
+                <Palette className="h-5 w-5 mr-2" />
+                View All Designs
+              </Button>
+            </Link>
+            <Link to="/custom-studio">
+              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white w-full sm:w-auto">
+                <Send className="h-5 w-5 mr-2" />
+                Send Custom Request
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </section>

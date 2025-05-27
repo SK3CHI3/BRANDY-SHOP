@@ -126,28 +126,25 @@ src/
 - **Constants**: UPPER_SNAKE_CASE (`API_ENDPOINTS.ts`)
 - **Types**: PascalCase (`UserProfile.ts`)
 
-## 🧪 Testing Guidelines
+## 🧪 Quality Assurance
 
-### Writing Tests
-- Write **unit tests** for utility functions
-- Create **component tests** for UI components
-- Add **integration tests** for complex features
-- Use **React Testing Library** for component testing
-- Mock external dependencies appropriately
+### Code Quality
+- Follow **TypeScript** best practices
+- Use **ESLint** for code linting
+- Ensure **responsive design** across devices
+- Test functionality manually before submitting
+- Check browser console for errors
 
-### Running Tests
+### Testing Checklist
 ```bash
-# Run all tests
-npm test
+# Lint your code
+npm run lint
 
-# Run tests in watch mode
-npm run test:watch
+# Build the project
+npm run build
 
-# Run tests with coverage
-npm run test:coverage
-
-# Run E2E tests
-npm run test:e2e
+# Test in development
+npm run dev
 ```
 
 ### Test Requirements
@@ -193,7 +190,7 @@ chore(deps): update dependencies to latest versions
 
 ### Before Submitting
 - [ ] Code follows our style guidelines
-- [ ] Tests pass locally
+- [ ] Code builds without errors (`npm run build`)
 - [ ] Documentation is updated if needed
 - [ ] Changes are tested on different screen sizes
 - [ ] No console errors or warnings

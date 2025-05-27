@@ -4,8 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useStats, useFeaturedProducts } from '@/hooks/useData';
 import { ArrowRight, Sparkles, Palette, Users, Star, Heart, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
-// Import debug utility for development
-import '@/utils/statsDebug';
+
 
 const HeroSection = () => {
   const { stats, loading } = useStats();
@@ -255,41 +254,41 @@ const HeroSection = () => {
                                 </div>
 
                                 {/* Content */}
-                                <div className="relative h-full flex items-center justify-between p-8 lg:p-12">
+                                <div className="relative h-full flex items-center justify-between p-4 sm:p-6 lg:p-8 xl:p-12">
                                   {/* Left Content */}
-                                  <div className="flex-1 text-white space-y-4">
+                                  <div className="flex-1 text-white space-y-2 sm:space-y-3 lg:space-y-4 max-w-[60%]">
                                     {/* Badge */}
                                     <div
-                                      className="inline-flex items-center px-4 py-2 backdrop-blur-sm rounded-full transition-all duration-300 hover:scale-105"
+                                      className="inline-flex items-center px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 backdrop-blur-sm rounded-full transition-all duration-300 hover:scale-105"
                                       style={{
                                         background: 'rgba(255, 255, 255, 0.15)',
                                         border: '1px solid rgba(255, 255, 255, 0.2)',
                                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                                       }}
                                     >
-                                      <Sparkles className="h-4 w-4 mr-2" />
-                                      <span className="text-sm font-medium">{item.badge}</span>
+                                      <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                                      <span className="text-xs sm:text-sm font-medium truncate">{item.badge}</span>
                                     </div>
 
                                     {/* Title */}
-                                    <h3 className="text-3xl lg:text-4xl font-bold leading-tight">
+                                    <h3 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight line-clamp-2">
                                       {item.title}
                                     </h3>
 
                                     {/* Subtitle */}
-                                    <p className="text-lg lg:text-xl text-white/90 max-w-md">
+                                    <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-white/90 line-clamp-2">
                                       {item.subtitle}
                                     </p>
 
                                     {/* Price */}
-                                    <div className="text-2xl lg:text-3xl font-bold">
+                                    <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold">
                                       {item.price}
                                     </div>
 
                                     {/* CTA Button */}
                                     <Button
-                                      size="lg"
-                                      className="text-white hover:scale-105 transition-all duration-300 mt-6 border-0"
+                                      size="sm"
+                                      className="text-white hover:scale-105 transition-all duration-300 mt-2 sm:mt-3 lg:mt-4 border-0 text-xs sm:text-sm lg:text-base px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3"
                                       style={{
                                         background: 'rgba(255, 255, 255, 0.15)',
                                         backdropFilter: 'blur(10px)',
@@ -303,20 +302,22 @@ const HeroSection = () => {
                                         e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
                                       }}
                                     >
-                                      {item.type === 'product' ? 'View Design' :
-                                       item.type === 'custom' ? 'Start Creating' : 'Browse All'}
-                                      <ArrowRight className="ml-2 h-5 w-5" />
+                                      <span className="truncate">
+                                        {item.type === 'product' ? 'View Design' :
+                                         item.type === 'custom' ? 'Start Creating' : 'Browse All'}
+                                      </span>
+                                      <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
                                     </Button>
                                   </div>
 
                                   {/* Right Visual */}
-                                  <div className="hidden lg:flex flex-1 justify-center items-center">
+                                  <div className="flex-shrink-0 ml-2 sm:ml-4 lg:ml-6 flex justify-center items-center">
                                     <div className="relative">
                                       {item.type === 'product' && item.image ? (
                                         <div
-                                          className="w-64 h-64 overflow-hidden transform group-hover:scale-105 transition-transform duration-500"
+                                          className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-48 lg:h-48 xl:w-56 xl:h-56 overflow-hidden transform group-hover:scale-105 transition-transform duration-500"
                                           style={{
-                                            borderRadius: '20px',
+                                            borderRadius: '16px',
                                             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)'
                                           }}
                                         >
@@ -328,25 +329,25 @@ const HeroSection = () => {
                                         </div>
                                       ) : (
                                         <div
-                                          className="w-64 h-64 backdrop-blur-sm flex items-center justify-center transform group-hover:scale-105 transition-transform duration-500"
+                                          className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-48 lg:h-48 xl:w-56 xl:h-56 backdrop-blur-sm flex items-center justify-center transform group-hover:scale-105 transition-transform duration-500"
                                           style={{
                                             background: 'rgba(255, 255, 255, 0.15)',
-                                            borderRadius: '20px',
+                                            borderRadius: '16px',
                                             border: '1px solid rgba(255, 255, 255, 0.2)',
                                             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
                                           }}
                                         >
                                           {item.type === 'custom' ? (
-                                            <Palette className="h-24 w-24 text-white drop-shadow-lg" />
+                                            <Palette className="h-6 w-6 sm:h-8 sm:w-8 md:h-12 md:w-12 lg:h-16 lg:w-16 xl:h-20 xl:w-20 text-white drop-shadow-lg" />
                                           ) : (
-                                            <Sparkles className="h-24 w-24 text-white drop-shadow-lg" />
+                                            <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 md:h-12 md:w-12 lg:h-16 lg:w-16 xl:h-20 xl:w-20 text-white drop-shadow-lg" />
                                           )}
                                         </div>
                                       )}
 
-                                      {/* Floating elements */}
+                                      {/* Floating elements - only show on larger screens */}
                                       <div
-                                        className="absolute -top-4 -right-4 w-8 h-8 rounded-full animate-pulse"
+                                        className="hidden lg:block absolute -top-2 -right-2 lg:-top-4 lg:-right-4 w-4 h-4 lg:w-8 lg:h-8 rounded-full animate-pulse"
                                         style={{
                                           background: 'rgba(255, 255, 255, 0.2)',
                                           backdropFilter: 'blur(10px)',
@@ -354,7 +355,7 @@ const HeroSection = () => {
                                         }}
                                       ></div>
                                       <div
-                                        className="absolute -bottom-4 -left-4 w-6 h-6 rounded-full animate-pulse delay-1000"
+                                        className="hidden lg:block absolute -bottom-2 -left-2 lg:-bottom-4 lg:-left-4 w-3 h-3 lg:w-6 lg:h-6 rounded-full animate-pulse delay-1000"
                                         style={{
                                           background: 'rgba(255, 255, 255, 0.15)',
                                           backdropFilter: 'blur(10px)',

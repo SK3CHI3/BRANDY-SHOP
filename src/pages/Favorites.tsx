@@ -7,18 +7,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
-import { 
-  Heart, 
-  ShoppingCart, 
-  Star, 
-  Trash2, 
+import {
+  Heart,
+  ShoppingCart,
+  Star,
+  Trash2,
   Share2,
   Filter,
   Grid3X3,
   List,
   Search,
-  SortAsc
+  SortAsc,
+  User,
+  Palette,
+  Lock,
+  ArrowLeft
 } from 'lucide-react'
+import { AuthModal } from '@/components/auth/AuthModal'
 
 interface FavoriteItem {
   id: string
@@ -45,6 +50,8 @@ const Favorites = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [sortBy, setSortBy] = useState('recent')
   const [filterCategory, setFilterCategory] = useState('all')
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
 
   // Mock favorites data
   const mockFavorites: FavoriteItem[] = [
@@ -155,9 +162,14 @@ const Favorites = () => {
     })
   }
 
+  const openAuthModal = (tab: 'signin' | 'signup') => {
+    setAuthModalTab(tab)
+    setAuthModalOpen(true)
+  }
+
   const categories = ['all', ...Array.from(new Set(favorites.map(item => item.category)))]
 
-  const filteredFavorites = favorites.filter(item => 
+  const filteredFavorites = favorites.filter(item =>
     filterCategory === 'all' || item.category === filterCategory
   )
 
@@ -180,14 +192,82 @@ const Favorites = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <Heart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h1>
-            <p className="text-gray-600 mb-4">Please sign in to view your favorites</p>
-            <Button>Sign In</Button>
+            {/* Icon with lock overlay */}
+            <div className="relative inline-block mb-8">
+              <Heart className="h-24 w-24 text-gray-300" />
+              <div className="absolute -bottom-2 -right-2 bg-red-500 rounded-full p-2">
+                <Lock className="h-6 w-6 text-white" />
+              </div>
+            </div>
+
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Your Favorites Collection
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Sign in to save and manage your favorite designs from talented Kenyan artists.
+              Build your personal collection of amazing artwork!
+            </p>
+
+            {/* Benefits */}
+            <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-3xl mx-auto">
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Heart className="h-8 w-8 text-red-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Save Designs</h3>
+                <p className="text-sm text-gray-600">Keep track of designs you love</p>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Star className="h-8 w-8 text-yellow-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Quick Access</h3>
+                <p className="text-sm text-gray-600">Easy access to your saved items</p>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Palette className="h-8 w-8 text-purple-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Discover Artists</h3>
+                <p className="text-sm text-gray-600">Follow your favorite creators</p>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button
+                size="lg"
+                onClick={() => openAuthModal('signin')}
+                className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 text-lg"
+              >
+                <User className="h-5 w-5 mr-2" />
+                Sign In to View Favorites
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => openAuthModal('signup')}
+                className="border-red-500 text-red-500 hover:bg-red-50 px-8 py-3 text-lg"
+              >
+                <Palette className="h-5 w-5 mr-2" />
+                Create Account
+              </Button>
+            </div>
+
+            {/* Continue shopping link */}
+            <div className="mt-8">
+              <Link
+                to="/marketplace"
+                className="inline-flex items-center text-gray-600 hover:text-red-500 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Discover amazing designs
+              </Link>
+            </div>
           </div>
         </div>
+
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          defaultTab={authModalTab}
+        />
         <Footer />
       </div>
     )
@@ -196,7 +276,7 @@ const Favorites = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -278,7 +358,7 @@ const Favorites = () => {
             </div>
 
             {/* Favorites Grid/List */}
-            <div className={viewMode === 'grid' 
+            <div className={viewMode === 'grid'
               ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
               : 'space-y-4'
             }>
@@ -319,7 +399,7 @@ const Favorites = () => {
                             {item.title}
                           </h3>
                         </Link>
-                        
+
                         <Link to={`/artist/${item.artist.id}`}>
                           <p className="text-sm text-gray-600 hover:text-orange-600 transition-colors mb-2">
                             by {item.artist.name}
@@ -384,7 +464,7 @@ const Favorites = () => {
           </>
         )}
       </div>
-      
+
       <Footer />
     </div>
   )

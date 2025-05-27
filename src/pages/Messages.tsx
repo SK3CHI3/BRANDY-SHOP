@@ -9,10 +9,10 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/hooks/use-toast'
-import { 
-  MessageCircle, 
-  Send, 
-  Search, 
+import {
+  MessageCircle,
+  Send,
+  Search,
   MoreVertical,
   Phone,
   Video,
@@ -23,8 +23,15 @@ import {
   Archive,
   Trash2,
   Circle,
-  CheckCheck
+  CheckCheck,
+  Lock,
+  ArrowLeft,
+  User,
+  Palette,
+  Users
 } from 'lucide-react'
+import { AuthModal } from '@/components/auth/AuthModal'
+import { Link } from 'react-router-dom'
 
 interface Message {
   id: string
@@ -59,6 +66,8 @@ const Messages = () => {
   const [newMessage, setNewMessage] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Mock data
@@ -176,9 +185,9 @@ const Messages = () => {
     if (selectedConversation) {
       setMessages(mockMessages)
       // Mark messages as read
-      setConversations(prev => 
-        prev.map(conv => 
-          conv.id === selectedConversation 
+      setConversations(prev =>
+        prev.map(conv =>
+          conv.id === selectedConversation
             ? { ...conv, unreadCount: 0 }
             : conv
         )
@@ -225,14 +234,14 @@ const Messages = () => {
     const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
 
     if (diffInHours < 24) {
-      return date.toLocaleTimeString('en-KE', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      return date.toLocaleTimeString('en-KE', {
+        hour: '2-digit',
+        minute: '2-digit'
       })
     } else {
-      return date.toLocaleDateString('en-KE', { 
-        month: 'short', 
-        day: 'numeric' 
+      return date.toLocaleDateString('en-KE', {
+        month: 'short',
+        day: 'numeric'
       })
     }
   }
@@ -251,18 +260,91 @@ const Messages = () => {
 
   const selectedConv = conversations.find(conv => conv.id === selectedConversation)
 
+  const openAuthModal = (tab: 'signin' | 'signup') => {
+    setAuthModalTab(tab)
+    setAuthModalOpen(true)
+  }
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <MessageCircle className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h1>
-            <p className="text-gray-600 mb-4">Please sign in to access your messages</p>
-            <Button>Sign In</Button>
+            {/* Icon with lock overlay */}
+            <div className="relative inline-block mb-8">
+              <MessageCircle className="h-24 w-24 text-gray-300" />
+              <div className="absolute -bottom-2 -right-2 bg-green-600 rounded-full p-2">
+                <Lock className="h-6 w-6 text-white" />
+              </div>
+            </div>
+
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Connect & Communicate
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Sign in to access your messages and communicate directly with artists,
+              customers, and support. Build relationships and collaborate on amazing projects!
+            </p>
+
+            {/* Benefits */}
+            <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-3xl mx-auto">
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Users className="h-8 w-8 text-green-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Direct Communication</h3>
+                <p className="text-sm text-gray-600">Chat with artists and customers</p>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Palette className="h-8 w-8 text-purple-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Project Collaboration</h3>
+                <p className="text-sm text-gray-600">Work together on custom designs</p>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <MessageCircle className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Real-time Support</h3>
+                <p className="text-sm text-gray-600">Get help when you need it</p>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button
+                size="lg"
+                onClick={() => openAuthModal('signin')}
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
+              >
+                <User className="h-5 w-5 mr-2" />
+                Sign In to Messages
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => openAuthModal('signup')}
+                className="border-green-600 text-green-600 hover:bg-green-50 px-8 py-3 text-lg"
+              >
+                <Palette className="h-5 w-5 mr-2" />
+                Create Account
+              </Button>
+            </div>
+
+            {/* Continue shopping link */}
+            <div className="mt-8">
+              <Link
+                to="/marketplace"
+                className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Explore marketplace
+              </Link>
+            </div>
           </div>
         </div>
+
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          defaultTab={authModalTab}
+        />
         <Footer />
       </div>
     )
@@ -271,7 +353,7 @@ const Messages = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Messages</h1>
@@ -395,8 +477,8 @@ const Messages = () => {
                       <div>
                         <h3 className="font-semibold text-gray-900">{selectedConv.participant.name}</h3>
                         <p className="text-sm text-gray-500">
-                          {selectedConv.participant.online 
-                            ? 'Online' 
+                          {selectedConv.participant.online
+                            ? 'Online'
                             : `Last seen ${formatTime(selectedConv.participant.lastSeen || '')}`
                           }
                         </p>
@@ -484,7 +566,7 @@ const Messages = () => {
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   )

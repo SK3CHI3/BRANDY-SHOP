@@ -213,10 +213,10 @@ Error: InstaPay API connection failed
 ```
 **Solution**: Verify API credentials and endpoint URLs
 
-### Debug Tools
-The application includes built-in debug tools:
-1. **Admin Panel**: `/admin-panel` - Database and user debugging
-2. **Browser Console**: Debug functions available globally
+### Monitoring Tools
+The application includes monitoring capabilities:
+1. **Admin Panel**: `/admin-panel` - User and product management
+2. **Browser Console**: Application logs and error tracking
 3. **Network Tab**: Monitor API calls and responses
 
 ### Getting Help

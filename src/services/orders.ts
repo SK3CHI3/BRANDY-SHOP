@@ -105,9 +105,9 @@ class OrdersService {
 
       return { order: order as Order }
     } catch (error) {
-      return { 
-        order: null, 
-        error: error instanceof Error ? error.message : 'Failed to create order' 
+      return {
+        order: null,
+        error: error instanceof Error ? error.message : 'Failed to create order'
       }
     }
   }
@@ -138,9 +138,9 @@ class OrdersService {
 
       return { order: data as Order }
     } catch (error) {
-      return { 
-        order: null, 
-        error: error instanceof Error ? error.message : 'Failed to fetch order' 
+      return {
+        order: null,
+        error: error instanceof Error ? error.message : 'Failed to fetch order'
       }
     }
   }
@@ -171,9 +171,9 @@ class OrdersService {
 
       return { order: data as Order }
     } catch (error) {
-      return { 
-        order: null, 
-        error: error instanceof Error ? error.message : 'Failed to fetch order' 
+      return {
+        order: null,
+        error: error instanceof Error ? error.message : 'Failed to fetch order'
       }
     }
   }
@@ -205,9 +205,9 @@ class OrdersService {
 
       return { orders: data as Order[] }
     } catch (error) {
-      return { 
-        orders: null, 
-        error: error instanceof Error ? error.message : 'Failed to fetch orders' 
+      return {
+        orders: null,
+        error: error instanceof Error ? error.message : 'Failed to fetch orders'
       }
     }
   }
@@ -217,7 +217,7 @@ class OrdersService {
     try {
       const { error } = await supabase
         .from('orders')
-        .update({ 
+        .update({
           status,
           updated_at: new Date().toISOString()
         })
@@ -229,21 +229,21 @@ class OrdersService {
 
       return { success: true }
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to update order status' 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to update order status'
       }
     }
   }
 
   // Update payment status
   async updatePaymentStatus(
-    orderId: string, 
-    paymentStatus: Order['payment_status'], 
+    orderId: string,
+    paymentStatus: Order['payment_status'],
     transactionId?: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const updateData: any = { 
+      const updateData: any = {
         payment_status: paymentStatus,
         updated_at: new Date().toISOString()
       }
@@ -262,25 +262,39 @@ class OrdersService {
       }
 
       // If payment is completed, update order status to confirmed
+      // Note: Artist earnings will be created automatically by database trigger
       if (paymentStatus === 'completed') {
-        await this.updateOrderStatus(orderId, 'confirmed')
-        await this.addTrackingUpdate(orderId, 'Payment Confirmed', 'Payment has been successfully processed')
+        // Update payment status to 'paid' which will trigger automatic earnings creation
+        const { error: updateError } = await supabase
+          .from('orders')
+          .update({
+            payment_status: 'paid',
+            status: 'confirmed',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', orderId)
+
+        if (updateError) {
+          console.error('Failed to update order status:', updateError)
+        } else {
+          await this.addTrackingUpdate(orderId, 'Payment Confirmed', 'Payment has been successfully processed and artist earnings have been created')
+        }
       }
 
       return { success: true }
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to update payment status' 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to update payment status'
       }
     }
   }
 
   // Add tracking update
   async addTrackingUpdate(
-    orderId: string, 
-    status: string, 
-    description: string, 
+    orderId: string,
+    status: string,
+    description: string,
     location?: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
@@ -300,9 +314,9 @@ class OrdersService {
 
       return { success: true }
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Failed to add tracking update' 
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to add tracking update'
       }
     }
   }
@@ -322,9 +336,9 @@ class OrdersService {
 
       return { tracking: data as OrderTracking[] }
     } catch (error) {
-      return { 
-        tracking: null, 
-        error: error instanceof Error ? error.message : 'Failed to fetch order tracking' 
+      return {
+        tracking: null,
+        error: error instanceof Error ? error.message : 'Failed to fetch order tracking'
       }
     }
   }
@@ -354,12 +368,15 @@ class OrdersService {
 
       return { orders: data }
     } catch (error) {
-      return { 
-        orders: null, 
-        error: error instanceof Error ? error.message : 'Failed to fetch artist orders' 
+      return {
+        orders: null,
+        error: error instanceof Error ? error.message : 'Failed to fetch artist orders'
       }
     }
   }
+
+  // Note: Artist earnings are now created automatically by database triggers
+  // when order payment_status changes to 'paid'. No manual intervention needed.
 }
 
 // Export singleton instance

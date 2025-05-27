@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { User, Search, Settings, LogOut, Palette, ShoppingBag, Shield, ShoppingCart, Menu, X, Heart, MessageCircle, Package } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { User, Search, Settings, LogOut, Palette, ShoppingBag, Shield, ShoppingCart, Menu, X, Heart, MessageCircle, Package, Bell, DollarSign } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/hooks/useData';
 import { AuthModal } from '@/components/auth/AuthModal';
@@ -11,11 +11,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const { cartCount } = useCart();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -26,6 +28,14 @@ const Header = () => {
   const openAuthModal = (tab: 'signin' | 'signup') => {
     setAuthModalTab(tab);
     setAuthModalOpen(true);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
   };
 
   const getRoleIcon = (role: string) => {
@@ -113,14 +123,28 @@ const Header = () => {
           </div>
 
           <div className="flex items-center space-x-2">
-            <div className="hidden lg:flex items-center bg-gray-50 hover:bg-gray-100 rounded-lg px-3 py-2 border border-gray-200 transition-colors duration-200 focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
+            <form onSubmit={handleSearch} className="hidden lg:flex items-center bg-gray-50 hover:bg-gray-100 rounded-lg px-3 py-2 border border-gray-200 transition-colors duration-200 focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500">
               <Search className="h-4 w-4 text-gray-400 mr-2" />
               <input
                 type="text"
                 placeholder="Search designs, artists..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="bg-transparent outline-none text-sm w-48 placeholder-gray-500"
               />
-            </div>
+            </form>
+
+            {/* Notifications Icon */}
+            {user && (
+              <Link to="/notifications" className="relative group">
+                <Button variant="ghost" size="sm" className="relative h-9 w-9 rounded-lg hover:bg-orange-50 transition-all duration-200">
+                  <Bell className="h-5 w-5 text-gray-700 group-hover:text-orange-600" />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium shadow-md">
+                    3
+                  </span>
+                </Button>
+              </Link>
+            )}
 
             {/* Cart Icon */}
             <Link to="/cart" className="relative group">
@@ -189,6 +213,12 @@ const Header = () => {
                     <Link to="/messages">
                       <MessageCircle className="mr-2 h-4 w-4" />
                       <span>Messages</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/notifications">
+                      <Bell className="mr-2 h-4 w-4" />
+                      <span>Notifications</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -268,14 +298,16 @@ const Header = () => {
           <div className="lg:hidden border-t border-gray-200 bg-white">
             <div className="px-4 py-4 space-y-3">
               {/* Mobile Search */}
-              <div className="flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
+              <form onSubmit={handleSearch} className="flex items-center bg-gray-50 rounded-xl px-4 py-2.5 border border-gray-200">
                 <Search className="h-4 w-4 text-gray-400 mr-3" />
                 <input
                   type="text"
                   placeholder="Search designs, artists..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="bg-transparent outline-none text-sm w-full placeholder-gray-500"
                 />
-              </div>
+              </form>
 
               {/* Mobile Navigation Links */}
               <nav className="space-y-2">
@@ -407,6 +439,14 @@ const Header = () => {
                     >
                       <MessageCircle className="h-4 w-4 mr-3" />
                       Messages
+                    </Link>
+                    <Link
+                      to="/notifications"
+                      className="flex items-center px-4 py-3 rounded-lg text-sm font-medium text-gray-700 hover:bg-orange-50"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Bell className="h-4 w-4 mr-3" />
+                      Notifications
                     </Link>
                     {profile?.role === 'artist' && (
                       <>

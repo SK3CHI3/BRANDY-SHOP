@@ -1,6 +1,7 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,11 +11,12 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
-import { 
-  Upload, 
-  Image as ImageIcon, 
-  X, 
+import {
+  Upload,
+  Image as ImageIcon,
+  X,
   Plus,
   Tag,
   DollarSign,
@@ -30,13 +32,15 @@ import {
 interface DesignForm {
   title: string
   description: string
-  category: string
+  category_id: string
   tags: string[]
   price: string
+  original_price: string
   images: File[]
   colors: string[]
   sizes: string[]
   materials: string[]
+  stock_quantity: string
 }
 
 const UploadDesign = () => {
@@ -46,29 +50,41 @@ const UploadDesign = () => {
   const [uploading, setUploading] = useState(false)
   const [currentTag, setCurrentTag] = useState('')
   const [currentColor, setCurrentColor] = useState('#000000')
-  
+  const [categories, setCategories] = useState<any[]>([])
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([])
+
   const [formData, setFormData] = useState<DesignForm>({
     title: '',
     description: '',
-    category: '',
+    category_id: '',
     tags: [],
     price: '',
+    original_price: '',
     images: [],
     colors: [],
     sizes: [],
-    materials: []
+    materials: [],
+    stock_quantity: '10'
   })
 
-  const categories = [
-    'T-Shirts',
-    'Hoodies',
-    'Mugs',
-    'Bags',
-    'Caps',
-    'Posters',
-    'Stickers',
-    'Phone Cases'
-  ]
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name');
+
+        if (error) throw error;
+        setCategories(data || []);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']
   const availableMaterials = ['Cotton', 'Polyester', 'Cotton Blend', 'Canvas', 'Ceramic', 'Vinyl']
@@ -82,7 +98,7 @@ const UploadDesign = () => {
     const validFiles = files.filter(file => {
       const isValidType = file.type.startsWith('image/')
       const isValidSize = file.size <= 10 * 1024 * 1024 // 10MB
-      
+
       if (!isValidType) {
         toast({
           title: 'Invalid File Type',
@@ -91,7 +107,7 @@ const UploadDesign = () => {
         })
         return false
       }
-      
+
       if (!isValidSize) {
         toast({
           title: 'File Too Large',
@@ -100,7 +116,7 @@ const UploadDesign = () => {
         })
         return false
       }
-      
+
       return true
     })
 
@@ -108,6 +124,29 @@ const UploadDesign = () => {
       ...prev,
       images: [...prev.images, ...validFiles].slice(0, 5) // Max 5 images
     }))
+  }
+
+  // Upload images to Supabase storage
+  const uploadImages = async (images: File[]): Promise<string[]> => {
+    const uploadPromises = images.map(async (file, index) => {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user?.id}_${Date.now()}_${index}.${fileExt}`
+      const filePath = `products/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(filePath, file)
+
+      if (uploadError) throw uploadError
+
+      const { data } = supabase.storage
+        .from('products')
+        .getPublicUrl(filePath)
+
+      return data.publicUrl
+    })
+
+    return Promise.all(uploadPromises)
   }
 
   const removeImage = (index: number) => {
@@ -187,7 +226,7 @@ const UploadDesign = () => {
       return false
     }
 
-    if (!formData.category) {
+    if (!formData.category_id) {
       toast({
         title: 'Category Required',
         description: 'Please select a category for your design',
@@ -223,29 +262,55 @@ const UploadDesign = () => {
     setUploading(true)
 
     try {
-      // Simulate upload process
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      // Upload images to Supabase storage
+      const imageUrls = await uploadImages(formData.images)
+
+      // Create product in database
+      const { data, error } = await supabase
+        .from('products')
+        .insert({
+          artist_id: user!.id,
+          title: formData.title,
+          description: formData.description,
+          category_id: formData.category_id || null,
+          price: parseFloat(formData.price),
+          original_price: formData.original_price ? parseFloat(formData.original_price) : null,
+          image_url: imageUrls[0], // Main image
+          additional_images: imageUrls.slice(1), // Additional images
+          tags: formData.tags,
+          colors: formData.colors,
+          sizes: formData.sizes,
+          materials: formData.materials,
+          stock_quantity: parseInt(formData.stock_quantity),
+          is_active: true
+        })
+        .select()
+
+      if (error) throw error
 
       toast({
         title: 'Design Uploaded Successfully!',
-        description: 'Your design has been submitted for review and will be available in the marketplace soon.',
+        description: 'Your design is now live in the marketplace!',
       })
 
       // Reset form
       setFormData({
         title: '',
         description: '',
-        category: '',
+        category_id: '',
         tags: [],
         price: '',
+        original_price: '',
         images: [],
         colors: [],
         sizes: [],
-        materials: []
+        materials: [],
+        stock_quantity: '10'
       })
 
       navigate('/artist-studio')
     } catch (error) {
+      console.error('Upload error:', error)
       toast({
         title: 'Upload Failed',
         description: 'Something went wrong. Please try again.',
@@ -283,7 +348,7 @@ const UploadDesign = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -295,7 +360,7 @@ const UploadDesign = () => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Studio
           </Button>
-          
+
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Upload New Design</h1>
           <p className="text-gray-600">
             Share your creativity with the world and start earning
@@ -334,17 +399,50 @@ const UploadDesign = () => {
 
                 <div>
                   <Label htmlFor="category">Category *</Label>
-                  <select
-                    id="category"
-                    value={formData.category}
-                    onChange={(e) => handleInputChange('category', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
+                  <Select value={formData.category_id} onValueChange={(value) => handleInputChange('category_id', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map(category => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="original_price">Original Price (KSh) - Optional</Label>
+                  <div className="relative">
+                    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      id="original_price"
+                      type="number"
+                      placeholder="0"
+                      className="pl-10"
+                      value={formData.original_price}
+                      onChange={(e) => handleInputChange('original_price', e.target.value)}
+                    />
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Set if this is a discounted price
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="stock">Stock Quantity</Label>
+                  <Input
+                    id="stock"
+                    type="number"
+                    placeholder="10"
+                    value={formData.stock_quantity}
+                    onChange={(e) => handleInputChange('stock_quantity', e.target.value)}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    How many items are available
+                  </p>
                 </div>
 
                 <div>
@@ -613,7 +711,7 @@ const UploadDesign = () => {
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   )

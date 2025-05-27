@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,9 +11,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminRoute from "@/components/auth/AdminRoute";
 import ArtistRoute from "@/components/auth/ArtistRoute";
 import AuthenticatedRoute from "@/components/auth/AuthenticatedRoute";
-// Import debug utilities for development
-// import "@/utils/userRoleDebug"; // Disabled to prevent 403 errors
-import "@/utils/databaseDebug";
+
 import Index from "./pages/Index";
 import Marketplace from "./pages/Marketplace";
 import CustomStudio from "./pages/CustomStudio";
@@ -32,16 +31,23 @@ import Privacy from "./pages/Privacy";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 import OrderTracking from "./pages/OrderTracking";
+import ArtistOrders from "./pages/ArtistOrders";
 import Favorites from "./pages/Favorites";
 import SizeGuide from "./pages/SizeGuide";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import Messages from "./pages/Messages";
 import Analytics from "./pages/Analytics";
 import UploadDesign from "./pages/UploadDesign";
+import RequestPayment from "./pages/RequestPayment";
+import Reviews from "./pages/Reviews";
+import Notifications from "./pages/Notifications";
+import Search from "./pages/Search";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+
+  return (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <TooltipProvider>
@@ -56,16 +62,8 @@ const App = () => (
             <Route path="/artist/:id" element={<ArtistProfile />} />
             <Route path="/product/:id" element={<ProductDetails />} />
             {/* Protected routes requiring authentication */}
-            <Route path="/profile" element={
-              <AuthenticatedRoute>
-                <Profile />
-              </AuthenticatedRoute>
-            } />
-            <Route path="/cart" element={
-              <AuthenticatedRoute>
-                <Cart />
-              </AuthenticatedRoute>
-            } />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={
               <AuthenticatedRoute>
                 <Checkout />
@@ -76,31 +74,16 @@ const App = () => (
                 <OrderConfirmation />
               </AuthenticatedRoute>
             } />
-            <Route path="/order-tracking" element={
-              <AuthenticatedRoute>
-                <OrderTracking />
-              </AuthenticatedRoute>
-            } />
-            <Route path="/orders/:id/track" element={
-              <AuthenticatedRoute>
-                <OrderTracking />
-              </AuthenticatedRoute>
-            } />
-            <Route path="/favorites" element={
-              <AuthenticatedRoute>
-                <Favorites />
-              </AuthenticatedRoute>
-            } />
-            <Route path="/wishlist" element={
-              <AuthenticatedRoute>
-                <Favorites />
-              </AuthenticatedRoute>
-            } />
-            <Route path="/messages" element={
-              <AuthenticatedRoute>
-                <Messages />
-              </AuthenticatedRoute>
-            } />
+            <Route path="/order-tracking" element={<OrderTracking />} />
+            <Route path="/track-order" element={<OrderTracking />} />
+            <Route path="/orders/:id/track" element={<OrderTracking />} />
+            <Route path="/favorites" element={<Favorites />} />
+            <Route path="/wishlist" element={<Favorites />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/reviews/:productId" element={<Reviews />} />
+            <Route path="/reviews" element={<Reviews />} />
+            <Route path="/search" element={<Search />} />
 
             {/* Dashboard routes with role-based access */}
             <Route path="/customer-dashboard" element={
@@ -125,6 +108,11 @@ const App = () => (
                 <ArtistStudio />
               </ArtistRoute>
             } />
+            <Route path="/artist-orders" element={
+              <ArtistRoute>
+                <ArtistOrders />
+              </ArtistRoute>
+            } />
             <Route path="/analytics" element={
               <ArtistRoute>
                 <Analytics />
@@ -133,6 +121,11 @@ const App = () => (
             <Route path="/upload-design" element={
               <ArtistRoute>
                 <UploadDesign />
+              </ArtistRoute>
+            } />
+            <Route path="/request-payment" element={
+              <ArtistRoute>
+                <RequestPayment />
               </ArtistRoute>
             } />
 
@@ -156,6 +149,7 @@ const App = () => (
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

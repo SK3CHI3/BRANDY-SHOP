@@ -59,12 +59,7 @@ const Footer = () => {
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-gray-400">
               <li><Link to="/contact" className="hover:text-white transition-colors">Help Center</Link></li>
-              {/* Order tracking - available for logged in users */}
-              {user ? (
-                <li><Link to="/order-tracking" className="hover:text-white transition-colors">Track Order</Link></li>
-              ) : (
-                <li><span className="text-gray-500 cursor-not-allowed">Track Order (Login Required)</span></li>
-              )}
+              <li><Link to="/order-tracking" className="hover:text-white transition-colors">Track Order</Link></li>
               <li><Link to="/size-guide" className="hover:text-white transition-colors">Size Guide</Link></li>
               <li><Link to="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
             </ul>

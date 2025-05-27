@@ -11,11 +11,15 @@ import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
-import { User, MapPin, Phone, Mail, Palette, Shield, ShoppingBag } from 'lucide-react'
+import { User, MapPin, Phone, Mail, Palette, Shield, ShoppingBag, Lock, ArrowLeft, Settings } from 'lucide-react'
+import { AuthModal } from '@/components/auth/AuthModal'
+import { Link } from 'react-router-dom'
 
 const Profile = () => {
   const { user, profile, updateProfile } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
     phone: profile?.phone || '',
@@ -65,7 +69,7 @@ const Profile = () => {
         .getPublicUrl(filePath)
 
       await updateProfile({ avatar_url: data.publicUrl })
-      
+
       toast({
         title: 'Success',
         description: 'Avatar updated successfully!',
@@ -103,16 +107,91 @@ const Profile = () => {
     }
   }
 
+  const openAuthModal = (tab: 'signin' | 'signup') => {
+    setAuthModalTab(tab)
+    setAuthModalOpen(true)
+  }
+
   if (!user || !profile) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-            <p className="text-gray-600">Please sign in to view your profile.</p>
+            {/* Icon with lock overlay */}
+            <div className="relative inline-block mb-8">
+              <User className="h-24 w-24 text-gray-300" />
+              <div className="absolute -bottom-2 -right-2 bg-blue-600 rounded-full p-2">
+                <Lock className="h-6 w-6 text-white" />
+              </div>
+            </div>
+
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Your Personal Profile
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Sign in to access your profile settings, manage your account information,
+              and customize your experience on Brandy Shop.
+            </p>
+
+            {/* Benefits */}
+            <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-3xl mx-auto">
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Settings className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Account Settings</h3>
+                <p className="text-sm text-gray-600">Manage your personal information</p>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Shield className="h-8 w-8 text-green-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Privacy Control</h3>
+                <p className="text-sm text-gray-600">Control your privacy settings</p>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Palette className="h-8 w-8 text-purple-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Artist Features</h3>
+                <p className="text-sm text-gray-600">Access artist tools and analytics</p>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button
+                size="lg"
+                onClick={() => openAuthModal('signin')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
+              >
+                <User className="h-5 w-5 mr-2" />
+                Sign In to Profile
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => openAuthModal('signup')}
+                className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg"
+              >
+                <Palette className="h-5 w-5 mr-2" />
+                Create Account
+              </Button>
+            </div>
+
+            {/* Continue shopping link */}
+            <div className="mt-8">
+              <Link
+                to="/marketplace"
+                className="inline-flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Continue browsing marketplace
+              </Link>
+            </div>
           </div>
         </div>
+
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          defaultTab={authModalTab}
+        />
         <Footer />
       </div>
     )
@@ -121,7 +200,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
@@ -146,7 +225,7 @@ const Profile = () => {
                       {profile.full_name?.charAt(0) || profile.email.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  
+
                   <input
                     type="file"
                     accept="image/*"
@@ -166,7 +245,7 @@ const Profile = () => {
                     <Mail className="h-4 w-4 text-gray-500" />
                     <span className="text-sm text-gray-600">{profile.email}</span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     {getRoleIcon(profile.role)}
                     <Badge className={getRoleColor(profile.role)}>

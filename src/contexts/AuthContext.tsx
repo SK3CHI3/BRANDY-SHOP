@@ -2,8 +2,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase, Profile, UserRole } from '@/lib/supabase'
 
+interface ExtendedUser extends User {
+  role?: UserRole
+  full_name?: string
+}
+
 interface AuthContextType {
-  user: User | null
+  user: ExtendedUser | null
   profile: Profile | null
   session: Session | null
   loading: boolean
@@ -24,43 +29,95 @@ export const useAuth = () => {
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<ExtendedUser | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchProfile(session.user.id)
-      } else {
-        setLoading(false)
-      }
+  const updateUserWithProfile = (baseUser: User | null, profileData: Profile | null) => {
+    if (!baseUser) {
+      setUser(null)
+      return
+    }
+
+    const extendedUser: ExtendedUser = {
+      ...baseUser,
+      role: profileData?.role || baseUser.user_metadata?.role || 'customer',
+      full_name: profileData?.full_name || baseUser.user_metadata?.full_name || ''
+    }
+
+    console.log('Setting user with profile:', {
+      email: extendedUser.email,
+      role: extendedUser.role,
+      full_name: extendedUser.full_name
     })
+
+    setUser(extendedUser)
+  }
+
+  useEffect(() => {
+    let mounted = true
+
+    // Get initial session
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+
+        if (!mounted) return
+
+        if (error) {
+          console.error('Error getting session:', error)
+          setLoading(false)
+          return
+        }
+
+        setSession(session)
+
+        if (session?.user) {
+          await fetchProfile(session.user.id, session.user)
+        } else {
+          setUser(null)
+          setProfile(null)
+          setLoading(false)
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error)
+        if (mounted) {
+          setLoading(false)
+        }
+      }
+    }
+
+    initializeAuth()
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return
+
+      console.log('Auth state changed:', event, session?.user?.email)
       setSession(session)
-      setUser(session?.user ?? null)
 
       if (session?.user) {
-        await fetchProfile(session.user.id)
+        await fetchProfile(session.user.id, session.user)
       } else {
+        setUser(null)
         setProfile(null)
         setLoading(false)
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, baseUser: User) => {
     try {
+      console.log('Fetching profile for user:', userId)
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -72,37 +129,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // If profile doesn't exist, try to create a basic one
         if (error.code === 'PGRST116') { // Not found error
-          const { data: userData } = await supabase.auth.getUser()
-          if (userData.user) {
-            const { error: createError } = await supabase
-              .from('profiles')
-              .insert({
-                id: userId,
-                email: userData.user.email,
-                full_name: userData.user.user_metadata?.full_name || '',
-                role: userData.user.user_metadata?.role || 'customer',
-                is_verified: false
-              })
+          console.log('Profile not found, creating new profile...')
 
-            if (!createError) {
-              // Retry fetching the profile
-              const { data: newProfile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .single()
-
-              if (newProfile) {
-                setProfile(newProfile)
-              }
-            }
+          const profileData = {
+            id: userId,
+            email: baseUser.email,
+            full_name: baseUser.user_metadata?.full_name || '',
+            role: baseUser.user_metadata?.role || 'customer',
+            is_verified: false
           }
+
+          const { error: createError } = await supabase
+            .from('profiles')
+            .insert(profileData)
+
+          if (!createError) {
+            console.log('Profile created successfully')
+            // Retry fetching the profile
+            const { data: newProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', userId)
+              .single()
+
+            if (newProfile) {
+              console.log('Profile fetched after creation:', newProfile)
+              setProfile(newProfile)
+              updateUserWithProfile(baseUser, newProfile)
+            } else {
+              console.log('Failed to fetch profile after creation, using fallback')
+              // Use the data we tried to insert as fallback
+              setProfile(profileData as any)
+              updateUserWithProfile(baseUser, profileData as any)
+            }
+          } else {
+            console.error('Error creating profile:', createError)
+            // Still set user even if profile creation fails
+            updateUserWithProfile(baseUser, null)
+          }
+        } else {
+          console.error('Profile fetch error (not 404):', error)
+          // Still set user even if profile fetch fails
+          updateUserWithProfile(baseUser, null)
         }
       } else {
+        console.log('Profile fetched successfully:', data)
         setProfile(data)
+        updateUserWithProfile(baseUser, data)
       }
     } catch (error) {
-      console.error('Error fetching profile:', error)
+      console.error('Unexpected error fetching profile:', error)
+      // Always set user even if profile operations fail
+      updateUserWithProfile(baseUser, null)
     } finally {
       setLoading(false)
     }
@@ -207,7 +285,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .eq('id', user.id)
 
     if (!error) {
-      setProfile(prev => prev ? { ...prev, ...updates } : null)
+      const updatedProfile = profile ? { ...profile, ...updates } : null
+      setProfile(updatedProfile)
+      updateUserWithProfile(user, updatedProfile)
     }
   }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { toast } from '@/hooks/use-toast'
 import {
   Package,
   Truck,
@@ -66,38 +65,7 @@ interface DesignPerformance {
   lastOrderDate: string
 }
 
-interface CustomerOrder {
-  id: string
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  orderNumber: string
-  createdAt: string
-  estimatedDelivery: string
-  total: number
-  items: Array<{
-    id: string
-    title: string
-    artist: string
-    price: number
-    quantity: number
-    image: string
-  }>
-  shippingAddress: {
-    name: string
-    address: string
-    city: string
-    phone: string
-  }
-  trackingNumber?: string
-  timeline: Array<{
-    status: string
-    description: string
-    timestamp: string
-    completed: boolean
-  }>
-}
-
-const OrderTracking = () => {
-  const { id } = useParams()
+const ArtistOrders = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState('orders')
@@ -105,13 +73,11 @@ const OrderTracking = () => {
   const [loading, setLoading] = useState(false)
   const [artistOrders, setArtistOrders] = useState<ArtistOrder[]>([])
   const [designPerformance, setDesignPerformance] = useState<DesignPerformance[]>([])
-  const [customerOrder, setCustomerOrder] = useState<CustomerOrder | null>(null)
 
-  // Check if user is artist and redirect to artist orders page
+  // Check if user is artist
   useEffect(() => {
-    if (user && user.role === 'artist') {
-      // If artist, redirect to artist-specific order management
-      navigate('/artist-orders')
+    if (user && user.role !== 'artist') {
+      navigate('/artist-studio')
     }
   }, [user, navigate])
 
@@ -247,23 +213,23 @@ const OrderTracking = () => {
     if (!dateString) return ''
     return new Date(dateString).toLocaleDateString('en-KE', {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     })
   }
 
-  // Show loading or redirect message for artists
-  if (user && user.role === 'artist') {
+  // Show loading or redirect message for non-artists
+  if (user && user.role !== 'artist') {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="p-6 text-center">
             <AlertCircle className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Redirecting...</h2>
+            <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
             <p className="text-gray-600">
-              Artists have a dedicated order management page. Redirecting you there...
+              This page is for artists only. Redirecting you back...
             </p>
           </CardContent>
         </Card>
@@ -363,170 +329,193 @@ const OrderTracking = () => {
           </Card>
         </div>
 
-        {/* Order Details */}
-        {order && (
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Order Status */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle>Order #{order.orderNumber}</CardTitle>
-                    <Badge className={getStatusColor(order.status)}>
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-2 text-gray-400" />
-                      <span className="text-gray-600">Ordered:</span>
-                      <span className="ml-2 font-medium">{formatDate(order.createdAt)}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Truck className="h-4 w-4 mr-2 text-gray-400" />
-                      <span className="text-gray-600">Estimated Delivery:</span>
-                      <span className="ml-2 font-medium">{formatDate(order.estimatedDelivery)}</span>
-                    </div>
-                    {order.trackingNumber && (
-                      <div className="flex items-center md:col-span-2">
-                        <Package className="h-4 w-4 mr-2 text-gray-400" />
-                        <span className="text-gray-600">Tracking Number:</span>
-                        <span className="ml-2 font-medium font-mono">{order.trackingNumber}</span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+        {/* Main Content Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:grid-cols-2 bg-white shadow-sm border border-gray-200 rounded-xl p-1">
+            <TabsTrigger
+              value="orders"
+              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
+            >
+              <ShoppingBag className="h-4 w-4 mr-2" />
+              Customer Orders
+            </TabsTrigger>
+            <TabsTrigger
+              value="performance"
+              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white"
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Design Performance
+            </TabsTrigger>
+          </TabsList>
 
-              {/* Order Timeline */}
+          {/* Customer Orders Tab */}
+          <TabsContent value="orders" className="space-y-6">
+            {filteredOrders.length === 0 ? (
               <Card>
-                <CardHeader>
-                  <CardTitle>Order Timeline</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {order.timeline.map((event, index) => (
-                      <div key={index} className="flex items-start">
-                        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
-                          event.completed
-                            ? 'bg-green-100 text-green-600'
-                            : 'bg-gray-100 text-gray-400'
-                        }`}>
-                          {event.completed ? (
-                            <CheckCircle className="h-4 w-4" />
-                          ) : (
-                            <Clock className="h-4 w-4" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-medium ${
-                            event.completed ? 'text-gray-900' : 'text-gray-500'
-                          }`}>
-                            {event.status}
-                          </p>
-                          <p className={`text-sm ${
-                            event.completed ? 'text-gray-600' : 'text-gray-400'
-                          }`}>
-                            {event.description}
-                          </p>
-                          {event.timestamp && (
-                            <p className="text-xs text-gray-400 mt-1">
-                              {formatDate(event.timestamp)}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Order Items */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Order Items</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {order.items.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-3">
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          className="w-12 h-12 rounded-lg object-cover"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {item.title}
-                          </p>
-                          <p className="text-xs text-gray-500">by {item.artist}</p>
-                          <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                        </div>
-                        <p className="text-sm font-medium">
-                          KSh {item.price.toLocaleString()}
-                        </p>
-                      </div>
-                    ))}
-                    <Separator />
-                    <div className="flex justify-between items-center font-medium">
-                      <span>Total</span>
-                      <span>KSh {order.total.toLocaleString()}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Shipping Address */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    Shipping Address
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-sm space-y-1">
-                    <p className="font-medium">{order.shippingAddress.name}</p>
-                    <p className="text-gray-600">{order.shippingAddress.address}</p>
-                    <p className="text-gray-600">{order.shippingAddress.city}</p>
-                    <div className="flex items-center mt-2 pt-2 border-t">
-                      <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                      <span className="text-gray-600">{order.shippingAddress.phone}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Contact Support */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Need Help?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Have questions about your order? Our support team is here to help.
+                <CardContent className="p-12 text-center">
+                  <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Orders Found</h3>
+                  <p className="text-gray-600">
+                    {searchTerm ? 'Try adjusting your search criteria' : 'Orders for your designs will appear here'}
                   </p>
-                  <div className="space-y-2">
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      <Mail className="h-4 w-4 mr-2" />
-                      Email Support
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      <Phone className="h-4 w-4 mr-2" />
-                      Call Support
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
-            </div>
-          </div>
-        )}
+            ) : (
+              <div className="space-y-4">
+                {filteredOrders.map((order) => (
+                  <Card key={order.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <img
+                            src={order.designImage}
+                            alt={order.designTitle}
+                            className="w-16 h-16 rounded-lg object-cover"
+                          />
+                          <div>
+                            <h3 className="font-semibold text-lg">{order.designTitle}</h3>
+                            <p className="text-gray-600">Order #{order.orderNumber}</p>
+                            <p className="text-sm text-gray-500">
+                              {formatDate(order.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                        <Badge className={getStatusColor(order.status)}>
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-gray-400" />
+                          <div>
+                            <p className="text-sm text-gray-600">Customer</p>
+                            <p className="font-medium">{order.customerName}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4 text-gray-400" />
+                          <div>
+                            <p className="text-sm text-gray-600">Quantity</p>
+                            <p className="font-medium">{order.quantity} items</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-gray-400" />
+                          <div>
+                            <p className="text-sm text-gray-600">Your Commission</p>
+                            <p className="font-medium text-green-600">
+                              KSh {order.commission.toLocaleString()} ({order.commissionRate}%)
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator className="my-4" />
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            <span>{order.shippingAddress}</span>
+                          </div>
+                          {order.trackingNumber && (
+                            <div className="flex items-center gap-1">
+                              <Truck className="h-3 w-3" />
+                              <span>Tracking: {order.trackingNumber}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-600">Total Order Value</p>
+                          <p className="font-bold text-lg">KSh {order.totalAmount.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Design Performance Tab */}
+          <TabsContent value="performance" className="space-y-6">
+            {filteredDesigns.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <BarChart3 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Design Data Found</h3>
+                  <p className="text-gray-600">
+                    {searchTerm ? 'Try adjusting your search criteria' : 'Design performance data will appear here'}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {filteredDesigns.map((design) => (
+                  <Card key={design.id} className="hover:shadow-lg transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4 mb-4">
+                        <img
+                          src={design.image}
+                          alt={design.title}
+                          className="w-20 h-20 rounded-lg object-cover"
+                        />
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg mb-2">{design.title}</h3>
+                          <div className="flex items-center gap-2 mb-2">
+                            <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                            <span className="font-medium">{design.averageRating.toFixed(1)}</span>
+                            <span className="text-gray-500">•</span>
+                            <Eye className="h-4 w-4 text-gray-400" />
+                            <span className="text-gray-600">{design.totalViews.toLocaleString()} views</span>
+                          </div>
+                          <p className="text-sm text-gray-500">
+                            Last order: {formatDate(design.lastOrderDate)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <p className="text-sm text-blue-600 font-medium">Total Orders</p>
+                          <p className="text-xl font-bold text-blue-700">{design.totalOrders}</p>
+                        </div>
+                        <div className="bg-green-50 p-3 rounded-lg">
+                          <p className="text-sm text-green-600 font-medium">Revenue</p>
+                          <p className="text-xl font-bold text-green-700">
+                            KSh {design.totalRevenue.toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="bg-purple-50 p-3 rounded-lg">
+                          <p className="text-sm text-purple-600 font-medium">Commission</p>
+                          <p className="text-xl font-bold text-purple-700">
+                            KSh {design.totalCommission.toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="bg-orange-50 p-3 rounded-lg">
+                          <p className="text-sm text-orange-600 font-medium">Conversion</p>
+                          <p className="text-xl font-bold text-orange-700">{design.conversionRate.toFixed(1)}%</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Design
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <BarChart3 className="h-4 w-4 mr-2" />
+                          Analytics
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
 
       <Footer />
@@ -534,4 +523,4 @@ const OrderTracking = () => {
   )
 }
 
-export default OrderTracking
+export default ArtistOrders

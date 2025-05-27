@@ -11,12 +11,12 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/hooks/use-toast'
-import { 
-  Heart, 
-  ShoppingCart, 
-  Star, 
-  User, 
-  MapPin, 
+import {
+  Heart,
+  ShoppingCart,
+  Star,
+  User,
+  MapPin,
   Palette,
   ArrowLeft,
   Share2
@@ -105,8 +105,8 @@ const ProductDetails = () => {
     }
   }
 
-  const averageRating = reviews.length > 0 
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length 
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
     : 0
 
   if (loading) {
@@ -147,7 +147,7 @@ const ProductDetails = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 mb-6">
@@ -161,13 +161,13 @@ const ProductDetails = () => {
           {/* Product Images */}
           <div className="space-y-4">
             <div className="aspect-square bg-white rounded-lg overflow-hidden">
-              <img 
-                src={images[selectedImage]} 
+              <img
+                src={images[selectedImage]}
                 alt={product.title}
                 className="w-full h-full object-cover"
               />
             </div>
-            
+
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
                 {images.map((image, index) => (
@@ -196,9 +196,9 @@ const ProductDetails = () => {
                   <Badge className="bg-yellow-100 text-yellow-800">Featured</Badge>
                 )}
               </div>
-              
+
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.title}</h1>
-              
+
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 text-yellow-500 fill-current" />
@@ -281,14 +281,14 @@ const ProductDetails = () => {
                     ))}
                   </select>
                 </div>
-                
+
                 <span className={`text-sm ${product.stock_quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
                   {product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
                 </span>
               </div>
 
               <div className="flex gap-3">
-                <Button 
+                <Button
                   onClick={addToCart}
                   disabled={addingToCart || product.stock_quantity === 0}
                   className="flex-1"
@@ -296,11 +296,11 @@ const ProductDetails = () => {
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   {addingToCart ? 'Adding...' : 'Add to Cart'}
                 </Button>
-                
+
                 <Button variant="outline" onClick={toggleFavorite}>
                   <Heart className={`h-4 w-4 ${isFavorited ? 'fill-current text-red-500' : ''}`} />
                 </Button>
-                
+
                 <Button variant="outline">
                   <Share2 className="h-4 w-4" />
                 </Button>
@@ -320,10 +320,17 @@ const ProductDetails = () => {
         <div className="mt-16">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Star className="h-5 w-5" />
-                Reviews ({reviews.length})
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="h-5 w-5" />
+                  Reviews ({reviews.length})
+                </CardTitle>
+                <Link to={`/reviews/${id}`}>
+                  <Button variant="outline" size="sm">
+                    View All Reviews
+                  </Button>
+                </Link>
+              </div>
             </CardHeader>
             <CardContent>
               {reviews.length > 0 ? (

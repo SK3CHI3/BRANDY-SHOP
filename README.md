@@ -12,9 +12,10 @@ Brandy Shop is more than just an online marketplace—it's a cultural bridge tha
 ## 🌟 Why Brandy Shop?
 
 ### For Artists 🎨
-- **💰 Monetize Your Creativity** - Transform artistic skills into sustainable income
+- **💰 Automated Earnings** - Instant earnings creation and M-Pesa withdrawals
+- **🤖 Zero Manual Work** - Fully automated payment processing system
 - **🌍 Global Reach** - Access international customers from your local studio
-- **📊 Analytics Dashboard** - Track sales, earnings, and customer engagement
+- **📊 Real-time Analytics** - Track sales, earnings, and withdrawal history
 - **🚀 Easy Onboarding** - Start selling in minutes with intuitive tools
 - **🎯 Marketing Support** - Featured artist programs and promotional opportunities
 
@@ -37,7 +38,9 @@ Brandy Shop is more than just an online marketplace—it's a cultural bridge tha
 Complete ecosystem for artists to showcase and sell their work
 - Upload and manage design portfolios
 - Set custom pricing and product options
-- Real-time sales analytics and earnings tracking
+- **🤖 Automated earnings creation** - Instant earnings when orders are paid
+- **💰 M-Pesa withdrawals** - Automated payment processing system
+- **📊 Real-time analytics** - Comprehensive earnings and withdrawal tracking
 - Artist verification and featured placement programs
 
 ### 🛍️ **Customer Experience**
@@ -47,12 +50,14 @@ Seamless shopping experience with powerful discovery tools
 - Secure checkout with multiple payment options
 - Order history and tracking dashboard
 
-### 🛠️ **Customization Studio** *(Coming Soon)*
-Real-time product editor for personalized designs
-- Drag-and-drop design interface
-- Live 3D product previews
-- Custom text and graphics overlay
-- Size and color customization
+### 🎨 **AI-Powered Custom Design Studio**
+Revolutionary AI-driven design creation and professional branding services
+- **AI Design Generation** - DeepAI integration with product-specific prompts
+- **Comprehensive Product Range** - 15+ categories from apparel to corporate gifts
+- **Dynamic Pricing Engine** - Market-based pricing with quantity discounts (5-25%)
+- **Professional Branding Services** - Screen printing, embroidery, digital printing
+- **Interactive Design Canvas** - Real-time editing with multiple product previews
+- **Guided Prompt System** - Product-specific AI suggestions and style modifiers
 
 ### 💳 **Payment Integration**
 Multiple payment options for global accessibility
@@ -131,10 +136,20 @@ Comprehensive data tracking for all stakeholders
 - [x] **Admin Dashboard** - User management, analytics, content moderation
 - [x] **Responsive Design** - Mobile-first, cross-device compatibility
 
-### 🚧 Phase 2: Enhanced Features (In Progress)
+### 🚧 Phase 2: AI-Powered Custom Design Studio (In Progress)
+- [x] **Market Research** - Comprehensive Kenya branding market analysis
+- [x] **AI Integration** - DeepAI service for design generation
+- [x] **Dynamic Pricing** - Market-based pricing calculator
+- [x] **Product Catalog** - Expanded range of branded merchandise
+- [ ] **Design Canvas** - Interactive AI-powered design editor
+- [ ] **Branding Services** - Professional screen printing, embroidery, digital printing
+- [ ] **Order Processing** - Custom design order management
+
+### ✅ Phase 2: Enhanced Features (Completed)
+- [x] **Artist Withdrawal System** - Fully automated earnings and M-Pesa payouts
+- [x] **Real-time Earnings Tracking** - Automatic earnings creation and management
+- [x] **Advanced Analytics** - Comprehensive system statistics and monitoring
 - [ ] **Custom Design Studio** - Real-time product customization
-- [ ] **Artist Commission System** - Automated earnings and payouts
-- [ ] **Advanced Analytics** - Sales insights, customer behavior tracking
 - [ ] **Review & Rating System** - Product and artist feedback
 - [ ] **Messaging System** - Artist-customer communication
 - [ ] **Inventory Management** - Stock tracking and alerts
@@ -182,6 +197,7 @@ npm run dev
 
 - 📖 **[Project Overview](docs/PROJECT_OVERVIEW.md)** - Comprehensive project documentation
 - 🛠️ **[Setup Guide](docs/SETUP_GUIDE.md)** - Installation and configuration
+- 💰 **[Withdrawal System](docs/WITHDRAWAL_SYSTEM.md)** - Automated earnings and payment system
 - 📡 **[API Reference](docs/API_REFERENCE.md)** - Complete API documentation
 - 🎨 **[Artist Guide](docs/ARTIST_GUIDE.md)** - How to succeed as an artist
 - ❓ **[FAQ](docs/FAQ.md)** - Frequently asked questions
@@ -225,6 +241,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <div align="center">
 
 ### 🇰🇪 Built with ❤️ in Kenya
+
+
 
 **Brandy Shop is more than just an e-commerce platform—it's a movement to empower African creativity, preserve cultural heritage, and build economic opportunities through technology.**
 

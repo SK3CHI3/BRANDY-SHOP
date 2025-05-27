@@ -157,7 +157,7 @@ class InstaPayService {
   private formatPhoneNumber(phone: string): string {
     // Remove any non-digit characters
     const cleaned = phone.replace(/\D/g, '');
-    
+
     // Handle different formats
     if (cleaned.startsWith('254')) {
       return cleaned;
@@ -166,7 +166,7 @@ class InstaPayService {
     } else if (cleaned.length === 9) {
       return '254' + cleaned;
     }
-    
+
     return cleaned;
   }
 
@@ -215,6 +215,62 @@ class InstaPayService {
     return Math.round(amount * rate);
   }
 
+  // Initiate M-Pesa withdrawal/transfer
+  async initiateWithdrawal(withdrawalData: {
+    amount: number;
+    phoneNumber: string;
+    reference: string;
+    description: string;
+  }): Promise<PaymentResponse> {
+    try {
+      const response = await this.makeRequest('/v1/payments/mpesa/b2c', {
+        amount: withdrawalData.amount,
+        phone_number: this.formatPhoneNumber(withdrawalData.phoneNumber),
+        reference: withdrawalData.reference,
+        description: withdrawalData.description,
+        occasion: 'Artist Withdrawal'
+      });
+
+      return {
+        success: response.success,
+        transactionId: response.transaction_id,
+        message: response.message || 'Withdrawal initiated successfully',
+        status: 'pending'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to initiate withdrawal. Please try again.',
+        status: 'failed'
+      };
+    }
+  }
+
+  // Check withdrawal status
+  async checkWithdrawalStatus(transactionId: string): Promise<PaymentStatus> {
+    try {
+      const response = await this.makeRequest(`/v1/payments/status/${transactionId}`);
+
+      return {
+        transactionId: response.transaction_id,
+        status: response.status,
+        amount: response.amount,
+        currency: response.currency,
+        timestamp: response.timestamp,
+        failureReason: response.failure_reason
+      };
+    } catch (error) {
+      return {
+        transactionId,
+        status: 'failed',
+        amount: 0,
+        currency: 'KES',
+        timestamp: new Date().toISOString(),
+        failureReason: 'Failed to check status'
+      };
+    }
+  }
+
   // Simulate payment for development/testing
   async simulatePayment(paymentData: PaymentRequest): Promise<PaymentResponse> {
     // Simulate API delay
@@ -222,7 +278,7 @@ class InstaPayService {
 
     // Simulate different outcomes based on amount
     const amount = paymentData.amount;
-    
+
     if (amount < 100) {
       return {
         success: false,
@@ -253,6 +309,54 @@ class InstaPayService {
       return {
         success: false,
         message: 'Payment failed. Please try again.',
+        status: 'failed'
+      };
+    }
+  }
+
+  // Simulate withdrawal for development/testing
+  async simulateWithdrawal(withdrawalData: {
+    amount: number;
+    phoneNumber: string;
+    reference: string;
+    description: string;
+  }): Promise<PaymentResponse> {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Simulate different outcomes based on amount
+    const amount = withdrawalData.amount;
+
+    if (amount < 1000) {
+      return {
+        success: false,
+        message: 'Minimum withdrawal amount is KSh 1,000',
+        status: 'failed'
+      };
+    }
+
+    if (amount > 150000) {
+      return {
+        success: false,
+        message: 'Withdrawal amount exceeds daily limit',
+        status: 'failed'
+      };
+    }
+
+    // 95% success rate for withdrawals (higher than payments)
+    const isSuccess = Math.random() > 0.05;
+
+    if (isSuccess) {
+      return {
+        success: true,
+        transactionId: `WTH_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        message: 'Withdrawal completed successfully',
+        status: 'completed'
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Withdrawal failed. Please try again later.',
         status: 'failed'
       };
     }

@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
+import { AuthModal } from '@/components/auth/AuthModal'
 import {
   ShoppingCart,
   Plus,
@@ -17,13 +18,19 @@ import {
   Trash2,
   ArrowLeft,
   CreditCard,
-  Truck
+  Truck,
+  User,
+  Palette,
+  Heart,
+  Lock
 } from 'lucide-react'
 
 const Cart = () => {
   const { user } = useAuth()
   const { cartItems, loading, removeFromCart, updateCartItem, cartTotal, cartCount } = useCart()
   const [processingCheckout, setProcessingCheckout] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
 
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return
@@ -59,20 +66,91 @@ const Cart = () => {
     window.location.href = '/checkout'
   }
 
+  const openAuthModal = (tab: 'signin' | 'signup') => {
+    setAuthModalTab(tab)
+    setAuthModalOpen(true)
+  }
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
-            <ShoppingCart className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Sign in to view your cart</h1>
-            <p className="text-gray-600 mb-6">Please sign in to access your shopping cart</p>
-            <Link to="/">
-              <Button>Go to Homepage</Button>
-            </Link>
+            {/* Icon with lock overlay */}
+            <div className="relative inline-block mb-8">
+              <ShoppingCart className="h-24 w-24 text-gray-300" />
+              <div className="absolute -bottom-2 -right-2 bg-orange-600 rounded-full p-2">
+                <Lock className="h-6 w-6 text-white" />
+              </div>
+            </div>
+
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Your Cart Awaits!
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Sign in to access your shopping cart and discover amazing designs from talented Kenyan artists.
+              Join our community of art lovers and creators!
+            </p>
+
+            {/* Benefits */}
+            <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-3xl mx-auto">
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Heart className="h-8 w-8 text-red-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Save Favorites</h3>
+                <p className="text-sm text-gray-600">Keep track of designs you love</p>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <ShoppingCart className="h-8 w-8 text-green-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Secure Cart</h3>
+                <p className="text-sm text-gray-600">Your items stay safe across sessions</p>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Palette className="h-8 w-8 text-purple-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Custom Orders</h3>
+                <p className="text-sm text-gray-600">Work directly with artists</p>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button
+                size="lg"
+                onClick={() => openAuthModal('signin')}
+                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 text-lg"
+              >
+                <User className="h-5 w-5 mr-2" />
+                Sign In to Your Cart
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => openAuthModal('signup')}
+                className="border-orange-600 text-orange-600 hover:bg-orange-50 px-8 py-3 text-lg"
+              >
+                <Palette className="h-5 w-5 mr-2" />
+                Create Account
+              </Button>
+            </div>
+
+            {/* Continue shopping link */}
+            <div className="mt-8">
+              <Link
+                to="/marketplace"
+                className="inline-flex items-center text-gray-600 hover:text-orange-600 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Continue browsing marketplace
+              </Link>
+            </div>
           </div>
         </div>
+
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          defaultTab={authModalTab}
+        />
         <Footer />
       </div>
     )

@@ -1,14 +1,121 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import Footer from '@/components/Footer'
+import AdminWithdrawals from '@/components/AdminWithdrawals';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Palette, ShoppingBag, Shield, User, Settings, BarChart3, Package, Users } from 'lucide-react';
+import { Palette, ShoppingBag, Shield, User, Settings, BarChart3, Package, Users, Star, Heart, TrendingUp, Eye } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
+
+  // State for dynamic data
+  const [dashboardData, setDashboardData] = useState({
+    totalDesigns: 0,
+    totalEarnings: 0,
+    activeOrders: 0,
+    averageRating: 0,
+    totalViews: 0,
+    totalFavorites: 0,
+    totalFollowers: 0,
+    recentProducts: [],
+    recentOrders: [],
+    recentReviews: []
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Fetch dashboard data
+  useEffect(() => {
+    if (!user || !profile) return;
+
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+
+        if (profile.role === 'artist') {
+          // Fetch artist-specific data
+          const [
+            productsResult,
+            ordersResult,
+            reviewsResult,
+            followersResult
+          ] = await Promise.all([
+            // Get artist's products
+            supabase
+              .from('products')
+              .select('*, favorites(id)')
+              .eq('artist_id', user.id)
+              .eq('is_active', true),
+
+            // Get orders for artist's products (if orders table exists)
+            supabase
+              .from('order_items')
+              .select(`
+                *,
+                order:orders(id, status, created_at, customer_id),
+                product:products!inner(artist_id)
+              `)
+              .eq('product.artist_id', user.id)
+              .limit(10),
+
+            // Get reviews for artist
+            supabase
+              .from('reviews')
+              .select(`
+                *,
+                customer:profiles!customer_id(full_name, avatar_url),
+                product:products(title)
+              `)
+              .eq('artist_id', user.id)
+              .order('created_at', { ascending: false })
+              .limit(5),
+
+            // Get followers count
+            supabase
+              .from('artist_followers')
+              .select('*', { count: 'exact', head: true })
+              .eq('artist_id', user.id)
+          ]);
+
+          const products = productsResult.data || [];
+          const orders = ordersResult.data || [];
+          const reviews = reviewsResult.data || [];
+          const followersCount = followersResult.count || 0;
+
+          // Calculate metrics
+          const totalEarnings = orders.reduce((sum, order) => sum + (order.price * order.quantity), 0);
+          const totalFavorites = products.reduce((sum, product) => sum + (product.favorites?.length || 0), 0);
+          const averageRating = reviews.length > 0
+            ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+            : 0;
+
+          setDashboardData({
+            totalDesigns: products.length,
+            totalEarnings,
+            activeOrders: orders.filter(order => order.order?.status === 'processing' || order.order?.status === 'confirmed').length,
+            averageRating,
+            totalViews: products.reduce((sum, product) => sum + (product.view_count || 0), 0),
+            totalFavorites,
+            totalFollowers: followersCount,
+            recentProducts: products.slice(0, 6),
+            recentOrders: orders.slice(0, 5),
+            recentReviews: reviews
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [user, profile]);
 
   if (!user || !profile) {
     return (
@@ -62,24 +169,52 @@ const Dashboard = () => {
     switch (role) {
       case 'artist':
         return [
-          { title: 'Total Designs', value: '12', icon: <Palette className="h-4 w-4" />, color: 'text-purple-600' },
-          { title: 'Total Earnings', value: 'KSh 45,000', icon: <BarChart3 className="h-4 w-4" />, color: 'text-green-600' },
-          { title: 'Active Orders', value: '8', icon: <Package className="h-4 w-4" />, color: 'text-blue-600' },
-          { title: 'Rating', value: '4.8', icon: <User className="h-4 w-4" />, color: 'text-yellow-600' },
+          {
+            title: 'Total Designs',
+            value: loading ? '...' : dashboardData.totalDesigns.toString(),
+            icon: <Palette className="h-4 w-4" />,
+            color: 'text-purple-600',
+            bgColor: 'bg-purple-50',
+            change: '+2 this month'
+          },
+          {
+            title: 'Total Earnings',
+            value: loading ? '...' : `KSh ${dashboardData.totalEarnings.toLocaleString()}`,
+            icon: <BarChart3 className="h-4 w-4" />,
+            color: 'text-green-600',
+            bgColor: 'bg-green-50',
+            change: '+12% this month'
+          },
+          {
+            title: 'Active Orders',
+            value: loading ? '...' : dashboardData.activeOrders.toString(),
+            icon: <Package className="h-4 w-4" />,
+            color: 'text-blue-600',
+            bgColor: 'bg-blue-50',
+            change: '3 pending'
+          },
+          {
+            title: 'Average Rating',
+            value: loading ? '...' : dashboardData.averageRating > 0 ? dashboardData.averageRating.toFixed(1) : 'New',
+            icon: <Star className="h-4 w-4" />,
+            color: 'text-yellow-600',
+            bgColor: 'bg-yellow-50',
+            change: `${dashboardData.recentReviews.length} reviews`
+          },
         ];
       case 'admin':
         return [
-          { title: 'Total Users', value: '1,234', icon: <Users className="h-4 w-4" />, color: 'text-blue-600' },
-          { title: 'Total Artists', value: '156', icon: <Palette className="h-4 w-4" />, color: 'text-purple-600' },
-          { title: 'Total Orders', value: '2,890', icon: <Package className="h-4 w-4" />, color: 'text-green-600' },
-          { title: 'Revenue', value: 'KSh 890,000', icon: <BarChart3 className="h-4 w-4" />, color: 'text-orange-600' },
+          { title: 'Total Users', value: '1,234', icon: <Users className="h-4 w-4" />, color: 'text-blue-600', bgColor: 'bg-blue-50' },
+          { title: 'Total Artists', value: '156', icon: <Palette className="h-4 w-4" />, color: 'text-purple-600', bgColor: 'bg-purple-50' },
+          { title: 'Total Orders', value: '2,890', icon: <Package className="h-4 w-4" />, color: 'text-green-600', bgColor: 'bg-green-50' },
+          { title: 'Revenue', value: 'KSh 890,000', icon: <BarChart3 className="h-4 w-4" />, color: 'text-orange-600', bgColor: 'bg-orange-50' },
         ];
       default:
         return [
-          { title: 'Orders', value: '5', icon: <Package className="h-4 w-4" />, color: 'text-blue-600' },
-          { title: 'Favorites', value: '23', icon: <User className="h-4 w-4" />, color: 'text-red-600' },
-          { title: 'Wishlist', value: '12', icon: <ShoppingBag className="h-4 w-4" />, color: 'text-purple-600' },
-          { title: 'Reviews', value: '8', icon: <BarChart3 className="h-4 w-4" />, color: 'text-green-600' },
+          { title: 'Orders', value: '5', icon: <Package className="h-4 w-4" />, color: 'text-blue-600', bgColor: 'bg-blue-50' },
+          { title: 'Favorites', value: '23', icon: <Heart className="h-4 w-4" />, color: 'text-red-600', bgColor: 'bg-red-50' },
+          { title: 'Wishlist', value: '12', icon: <ShoppingBag className="h-4 w-4" />, color: 'text-purple-600', bgColor: 'bg-purple-50' },
+          { title: 'Reviews', value: '8', icon: <BarChart3 className="h-4 w-4" />, color: 'text-green-600', bgColor: 'bg-green-50' },
         ];
     }
   };
@@ -89,7 +224,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
         <div className="mb-8">
@@ -97,8 +232,8 @@ const Dashboard = () => {
             <div className="flex items-center gap-2">
               {getRoleIcon(profile.role)}
               <h1 className="text-3xl font-bold text-gray-900">
-                {profile.role === 'artist' ? 'Artist Studio' : 
-                 profile.role === 'admin' ? 'Admin Panel' : 
+                {profile.role === 'artist' ? 'Artist Studio' :
+                 profile.role === 'admin' ? 'Admin Panel' :
                  'Customer Dashboard'}
               </h1>
             </div>
@@ -114,17 +249,152 @@ const Dashboard = () => {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {dashboardCards.map((card, index) => (
-            <Card key={index}>
+            <Card key={index} className="hover:shadow-lg transition-shadow duration-300">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-                <div className={card.color}>{card.icon}</div>
+                <CardTitle className="text-sm font-medium text-gray-600">{card.title}</CardTitle>
+                <div className={`p-2 rounded-lg ${card.bgColor || 'bg-gray-50'}`}>
+                  <div className={card.color}>{card.icon}</div>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{card.value}</div>
+                <div className="text-2xl font-bold text-gray-900 mb-1">{card.value}</div>
+                {card.change && (
+                  <p className="text-xs text-gray-500">{card.change}</p>
+                )}
               </CardContent>
             </Card>
           ))}
         </div>
+
+        {/* Artist-specific sections */}
+        {profile.role === 'artist' && (
+          <div className="grid lg:grid-cols-2 gap-8 mb-8">
+            {/* Recent Products */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette className="h-5 w-5" />
+                  Recent Designs
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="flex items-center space-x-3 animate-pulse">
+                        <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : dashboardData.recentProducts.length > 0 ? (
+                  <div className="space-y-3">
+                    {dashboardData.recentProducts.slice(0, 4).map((product: any) => (
+                      <div key={product.id} className="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                        <img
+                          src={product.image_url || '/placeholder.svg'}
+                          alt={product.title}
+                          className="w-12 h-12 object-cover rounded-lg"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 truncate">{product.title}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span>KSh {product.price?.toLocaleString()}</span>
+                            <span>•</span>
+                            <div className="flex items-center gap-1">
+                              <Heart className="h-3 w-3" />
+                              <span>{product.favorites?.length || 0}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-gray-500">
+                    <Palette className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                    <p>No designs yet</p>
+                    <Button
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => navigate('/upload-design')}
+                    >
+                      Upload Your First Design
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Reviews */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="h-5 w-5" />
+                  Recent Reviews
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                          <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                        </div>
+                        <div className="h-3 bg-gray-200 rounded w-full mb-1"></div>
+                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : dashboardData.recentReviews.length > 0 ? (
+                  <div className="space-y-4">
+                    {dashboardData.recentReviews.slice(0, 3).map((review: any) => (
+                      <div key={review.id} className="border-l-4 border-yellow-400 pl-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-4 w-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-200'}`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-600">
+                            by {review.customer?.full_name || 'Anonymous'}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-700 line-clamp-2">{review.comment}</p>
+                        {review.product && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            for "{review.product.title}"
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 text-gray-500">
+                    <Star className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                    <p>No reviews yet</p>
+                    <p className="text-sm">Reviews will appear here when customers rate your designs</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Admin-specific sections */}
+        {profile.role === 'admin' && (
+          <div className="mb-8">
+            <AdminWithdrawals />
+          </div>
+        )}
 
         {/* Quick Actions */}
         <Card>
@@ -138,49 +408,82 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {profile.role === 'artist' && (
                 <>
-                  <Button className="h-20 flex flex-col gap-2">
+                  <Button
+                    className="h-20 flex flex-col gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    onClick={() => navigate('/upload-design')}
+                  >
                     <Palette className="h-6 w-6" />
                     Upload New Design
                   </Button>
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex flex-col gap-2 hover:bg-blue-50 hover:border-blue-200"
+                    onClick={() => navigate('/analytics')}
+                  >
                     <BarChart3 className="h-6 w-6" />
                     View Analytics
                   </Button>
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex flex-col gap-2 hover:bg-green-50 hover:border-green-200"
+                    onClick={() => navigate('/artist-studio')}
+                  >
                     <Package className="h-6 w-6" />
-                    Manage Orders
+                    Manage Studio
                   </Button>
                 </>
               )}
-              
+
               {profile.role === 'admin' && (
                 <>
-                  <Button className="h-20 flex flex-col gap-2">
+                  <Button
+                    className="h-20 flex flex-col gap-2"
+                    onClick={() => navigate('/admin-panel')}
+                  >
                     <Users className="h-6 w-6" />
                     Manage Users
                   </Button>
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex flex-col gap-2"
+                    onClick={() => navigate('/analytics')}
+                  >
                     <BarChart3 className="h-6 w-6" />
                     View Reports
                   </Button>
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex flex-col gap-2"
+                    onClick={() => navigate('/admin-panel')}
+                  >
                     <Settings className="h-6 w-6" />
                     Platform Settings
                   </Button>
                 </>
               )}
-              
+
               {profile.role === 'customer' && (
                 <>
-                  <Button className="h-20 flex flex-col gap-2">
+                  <Button
+                    className="h-20 flex flex-col gap-2"
+                    onClick={() => navigate('/marketplace')}
+                  >
                     <ShoppingBag className="h-6 w-6" />
                     Browse Marketplace
                   </Button>
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex flex-col gap-2"
+                    onClick={() => navigate('/order-tracking')}
+                  >
                     <Package className="h-6 w-6" />
                     Track Orders
                   </Button>
-                  <Button variant="outline" className="h-20 flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    className="h-20 flex flex-col gap-2"
+                    onClick={() => navigate('/profile')}
+                  >
                     <User className="h-6 w-6" />
                     Update Profile
                   </Button>

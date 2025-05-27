@@ -9,9 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
-import RoleDebugPanel from '@/components/debug/RoleDebugPanel'
-import DatabaseDebugPanel from '@/components/debug/DatabaseDebugPanel'
-import DataLoadingTest from '@/components/debug/DataLoadingTest'
+
 import {
   Shield,
   Users,
@@ -20,9 +18,7 @@ import {
   UserCheck,
   UserX,
   Eye,
-  Trash2,
-  Bug,
-  Database
+  Trash2
 } from 'lucide-react'
 
 const AdminPanel = () => {
@@ -228,17 +224,9 @@ const AdminPanel = () => {
           <TabsList>
             <TabsTrigger value="users">User Management</TabsTrigger>
             <TabsTrigger value="products">Product Management</TabsTrigger>
-            <TabsTrigger value="debug">
-              <Bug className="h-4 w-4 mr-2" />
-              User Debug
-            </TabsTrigger>
-            <TabsTrigger value="database">
-              <Database className="h-4 w-4 mr-2" />
-              Database Debug
-            </TabsTrigger>
-            <TabsTrigger value="data-test">
+            <TabsTrigger value="analytics">
               <BarChart3 className="h-4 w-4 mr-2" />
-              Data Loading Test
+              Analytics
             </TabsTrigger>
           </TabsList>
 
@@ -342,16 +330,18 @@ const AdminPanel = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="debug">
-            <RoleDebugPanel />
-          </TabsContent>
-
-          <TabsContent value="database">
-            <DatabaseDebugPanel />
-          </TabsContent>
-
-          <TabsContent value="data-test">
-            <DataLoadingTest />
+          <TabsContent value="analytics">
+            <Card>
+              <CardHeader>
+                <CardTitle>System Analytics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-gray-500">
+                  <BarChart3 className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                  <p>Analytics dashboard coming soon...</p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
