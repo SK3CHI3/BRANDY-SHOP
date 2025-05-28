@@ -183,6 +183,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, defaultTa
                   <SelectContent>
                     <SelectItem value="customer">Customer</SelectItem>
                     <SelectItem value="artist">Artist</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

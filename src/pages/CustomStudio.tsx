@@ -263,61 +263,61 @@ const CustomStudio = () => {
       <Header />
 
       {/* Simple Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-orange-500 text-white py-4">
+      <div className="bg-gradient-to-r from-purple-600 to-orange-500 text-white py-3 sm:py-4">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Sparkles className="h-6 w-6 mr-2" />
-              <h1 className="text-xl font-bold">AI Design Studio</h1>
+              <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+              <h1 className="text-lg sm:text-xl font-bold">AI Design Studio</h1>
             </div>
-            <div className="text-sm opacity-90">Create • Design • Order</div>
+            <div className="text-xs sm:text-sm opacity-90 hidden sm:block">Create • Design • Order</div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="container mx-auto px-4 py-4 sm:py-6 max-w-6xl">
 
         {/* Progressive Steps */}
-        <div className="mb-6">
-          <div className="flex items-center justify-center space-x-4 mb-8">
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex items-center justify-center space-x-2 sm:space-x-4 mb-6 sm:mb-8 overflow-x-auto">
+            <div className="flex items-center flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full flex items-center justify-center text-xs sm:text-sm font-bold shadow-lg">
                 ✓
               </div>
-              <span className="ml-3 text-sm font-semibold text-purple-700">Choose Product</span>
+              <span className="ml-2 sm:ml-3 text-xs sm:text-sm font-semibold text-purple-700 whitespace-nowrap">Choose Product</span>
             </div>
-            <div className="w-12 h-1 bg-gradient-to-r from-purple-600 to-orange-500 rounded-full"></div>
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-lg">
+            <div className="w-8 sm:w-12 h-1 bg-gradient-to-r from-purple-600 to-orange-500 rounded-full flex-shrink-0"></div>
+            <div className="flex items-center flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-full flex items-center justify-center text-xs sm:text-sm font-bold shadow-lg">
                 2
               </div>
-              <span className="ml-3 text-sm font-semibold text-orange-700">Design</span>
+              <span className="ml-2 sm:ml-3 text-xs sm:text-sm font-semibold text-orange-700 whitespace-nowrap">Design</span>
             </div>
-            <div className="w-12 h-1 bg-gradient-to-r from-orange-500 to-green-500 rounded-full opacity-50"></div>
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm font-bold">
+            <div className="w-8 sm:w-12 h-1 bg-gradient-to-r from-orange-500 to-green-500 rounded-full opacity-50 flex-shrink-0"></div>
+            <div className="flex items-center flex-shrink-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold">
                 3
               </div>
-              <span className="ml-3 text-sm font-medium text-gray-500">Order</span>
+              <span className="ml-2 sm:ml-3 text-xs sm:text-sm font-medium text-gray-500 whitespace-nowrap">Order</span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
 
           {/* Step 1: Product Selection */}
           <div className="lg:col-span-1">
             <Card className="h-fit">
-              <CardHeader>
-                <CardTitle className="flex items-center text-lg">
-                  <Grid3X3 className="h-5 w-5 mr-2 text-purple-600" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center text-base sm:text-lg">
+                  <Grid3X3 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-purple-600" />
                   Select Product
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                 {/* Product Category Dropdown */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Product Category</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Product Category</label>
                   <Select value={selectedCategory} onValueChange={(value: 'apparel' | 'promotional' | 'corporate') => {
                     setSelectedCategory(value);
                     // Auto-select first product from new category

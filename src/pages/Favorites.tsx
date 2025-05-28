@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -27,20 +28,24 @@ import { AuthModal } from '@/components/auth/AuthModal'
 
 interface FavoriteItem {
   id: string
-  title: string
-  artist: {
+  product_id: string
+  created_at: string
+  product: {
     id: string
-    name: string
-    avatar: string
+    title: string
+    price: number
+    original_price?: number
+    image_url: string
+    stock_quantity: number
+    category?: {
+      name: string
+    }
+    artist?: {
+      id: string
+      full_name: string
+      avatar_url?: string
+    }
   }
-  price: number
-  originalPrice?: number
-  image: string
-  rating: number
-  reviewCount: number
-  category: string
-  addedAt: string
-  inStock: boolean
 }
 
 const Favorites = () => {
@@ -53,93 +58,95 @@ const Favorites = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
 
-  // Mock favorites data
-  const mockFavorites: FavoriteItem[] = [
-    {
-      id: '1',
-      title: 'Kenyan Wildlife Safari T-Shirt',
-      artist: {
-        id: 'artist1',
-        name: 'Sarah Wanjiku',
-        avatar: '/placeholder.svg'
-      },
-      price: 1500,
-      originalPrice: 2000,
-      image: '/placeholder.svg',
-      rating: 4.8,
-      reviewCount: 124,
-      category: 'T-Shirts',
-      addedAt: '2024-01-15T10:30:00Z',
-      inStock: true
-    },
-    {
-      id: '2',
-      title: 'Traditional Maasai Patterns Hoodie',
-      artist: {
-        id: 'artist2',
-        name: 'John Mwangi',
-        avatar: '/placeholder.svg'
-      },
-      price: 2500,
-      image: '/placeholder.svg',
-      rating: 4.9,
-      reviewCount: 89,
-      category: 'Hoodies',
-      addedAt: '2024-01-14T15:20:00Z',
-      inStock: true
-    },
-    {
-      id: '3',
-      title: 'Nairobi Skyline Coffee Mug',
-      artist: {
-        id: 'artist3',
-        name: 'Grace Njeri',
-        avatar: '/placeholder.svg'
-      },
-      price: 800,
-      image: '/placeholder.svg',
-      rating: 4.6,
-      reviewCount: 67,
-      category: 'Mugs',
-      addedAt: '2024-01-13T09:45:00Z',
-      inStock: false
-    },
-    {
-      id: '4',
-      title: 'Kikuyu Proverbs Canvas Tote',
-      artist: {
-        id: 'artist4',
-        name: 'Peter Kamau',
-        avatar: '/placeholder.svg'
-      },
-      price: 1200,
-      image: '/placeholder.svg',
-      rating: 4.7,
-      reviewCount: 45,
-      category: 'Bags',
-      addedAt: '2024-01-12T14:10:00Z',
-      inStock: true
-    }
-  ]
+  // Fetch favorites from Supabase
+  const fetchFavorites = async () => {
+    if (!user) return
 
-  useEffect(() => {
-    // Simulate loading favorites
-    setTimeout(() => {
-      setFavorites(mockFavorites)
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('favorites')
+        .select(`
+          id,
+          product_id,
+          created_at,
+          product:products (
+            id,
+            title,
+            price,
+            original_price,
+            image_url,
+            stock_quantity,
+            category:categories (
+              name
+            ),
+            artist:profiles!products_artist_id_fkey (
+              id,
+              full_name,
+              avatar_url
+            )
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      setFavorites(data || [])
+    } catch (error) {
+      console.error('Error fetching favorites:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to load favorites',
+        variant: 'destructive',
+      })
+    } finally {
       setLoading(false)
-    }, 1000)
-  }, [])
-
-  const removeFavorite = (itemId: string) => {
-    setFavorites(prev => prev.filter(item => item.id !== itemId))
-    toast({
-      title: 'Removed from Favorites',
-      description: 'Item has been removed from your favorites list',
-    })
+    }
   }
 
-  const addToCart = (item: FavoriteItem) => {
-    if (!item.inStock) {
+  useEffect(() => {
+    if (user) {
+      fetchFavorites()
+    }
+  }, [user])
+
+  const removeFavorite = async (itemId: string) => {
+    if (!user) return
+
+    try {
+      const { error } = await supabase
+        .from('favorites')
+        .delete()
+        .eq('id', itemId)
+
+      if (error) throw error
+
+      setFavorites(prev => prev.filter(item => item.id !== itemId))
+      toast({
+        title: 'Removed from Favorites',
+        description: 'Item has been removed from your favorites list',
+      })
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to remove item from favorites',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const addToCart = async (item: FavoriteItem) => {
+    if (!user) {
+      toast({
+        title: 'Sign in required',
+        description: 'Please sign in to add items to cart',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    if (item.product.stock_quantity === 0) {
       toast({
         title: 'Out of Stock',
         description: 'This item is currently out of stock',
@@ -148,10 +155,40 @@ const Favorites = () => {
       return
     }
 
-    toast({
-      title: 'Added to Cart',
-      description: `${item.title} has been added to your cart`,
-    })
+    try {
+      const { data: existingItem } = await supabase
+        .from('cart_items')
+        .select('id, quantity')
+        .eq('user_id', user.id)
+        .eq('product_id', item.product_id)
+        .single()
+
+      if (existingItem) {
+        await supabase
+          .from('cart_items')
+          .update({ quantity: existingItem.quantity + 1 })
+          .eq('id', existingItem.id)
+      } else {
+        await supabase
+          .from('cart_items')
+          .insert({
+            user_id: user.id,
+            product_id: item.product_id,
+            quantity: 1
+          })
+      }
+
+      toast({
+        title: 'Added to Cart',
+        description: `${item.product.title} has been added to your cart`,
+      })
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to add item to cart',
+        variant: 'destructive',
+      })
+    }
   }
 
   const formatDate = (dateString: string) => {
@@ -167,22 +204,22 @@ const Favorites = () => {
     setAuthModalOpen(true)
   }
 
-  const categories = ['all', ...Array.from(new Set(favorites.map(item => item.category)))]
+  const categories = ['all', ...Array.from(new Set(favorites.map(item => item.product.category?.name).filter(Boolean)))]
 
   const filteredFavorites = favorites.filter(item =>
-    filterCategory === 'all' || item.category === filterCategory
+    filterCategory === 'all' || item.product.category?.name === filterCategory
   )
 
   const sortedFavorites = [...filteredFavorites].sort((a, b) => {
     switch (sortBy) {
       case 'recent':
-        return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime()
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       case 'price-low':
-        return a.price - b.price
+        return a.product.price - b.product.price
       case 'price-high':
-        return b.price - a.price
+        return b.product.price - a.product.price
       case 'rating':
-        return b.rating - a.rating
+        return 0 // We'll implement rating later
       default:
         return 0
     }
@@ -370,13 +407,13 @@ const Favorites = () => {
                     viewMode === 'list' ? 'w-48 flex-shrink-0' : 'aspect-square'
                   }`}>
                     <img
-                      src={item.image}
-                      alt={item.title}
+                      src={item.product.image_url || '/placeholder.svg'}
+                      alt={item.product.title}
                       className={`w-full h-full object-cover ${
                         viewMode === 'list' ? 'rounded-l-lg' : 'rounded-t-lg'
                       }`}
                     />
-                    {!item.inStock && (
+                    {item.product.stock_quantity === 0 && (
                       <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-t-lg">
                         <Badge variant="secondary">Out of Stock</Badge>
                       </div>
@@ -394,23 +431,25 @@ const Favorites = () => {
                   <CardContent className={`p-4 ${viewMode === 'list' ? 'flex-1' : ''}`}>
                     <div className={viewMode === 'list' ? 'flex justify-between h-full' : ''}>
                       <div className={viewMode === 'list' ? 'flex-1' : ''}>
-                        <Link to={`/product/${item.id}`}>
+                        <Link to={`/product/${item.product.id}`}>
                           <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors line-clamp-2">
-                            {item.title}
+                            {item.product.title}
                           </h3>
                         </Link>
 
-                        <Link to={`/artist/${item.artist.id}`}>
-                          <p className="text-sm text-gray-600 hover:text-orange-600 transition-colors mb-2">
-                            by {item.artist.name}
-                          </p>
-                        </Link>
+                        {item.product.artist && (
+                          <Link to={`/artist/${item.product.artist.id}`}>
+                            <p className="text-sm text-gray-600 hover:text-orange-600 transition-colors mb-2">
+                              by {item.product.artist.full_name}
+                            </p>
+                          </Link>
+                        )}
 
                         <div className="flex items-center mb-2">
                           <div className="flex items-center">
                             <Star className="h-4 w-4 text-yellow-400 fill-current" />
                             <span className="text-sm text-gray-600 ml-1">
-                              {item.rating} ({item.reviewCount})
+                              4.5 (0) {/* TODO: Implement real ratings */}
                             </span>
                           </div>
                         </div>
@@ -418,21 +457,21 @@ const Favorites = () => {
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center space-x-2">
                             <span className="text-lg font-bold text-gray-900">
-                              KSh {item.price.toLocaleString()}
+                              KSh {item.product.price.toLocaleString()}
                             </span>
-                            {item.originalPrice && (
+                            {item.product.original_price && item.product.original_price > item.product.price && (
                               <span className="text-sm text-gray-500 line-through">
-                                KSh {item.originalPrice.toLocaleString()}
+                                KSh {item.product.original_price.toLocaleString()}
                               </span>
                             )}
                           </div>
                           <Badge variant="outline" className="text-xs">
-                            {item.category}
+                            {item.product.category?.name || 'Uncategorized'}
                           </Badge>
                         </div>
 
                         <p className="text-xs text-gray-500 mb-3">
-                          Added {formatDate(item.addedAt)}
+                          Added {formatDate(item.created_at)}
                         </p>
                       </div>
 
@@ -442,7 +481,7 @@ const Favorites = () => {
                         <Button
                           size="sm"
                           onClick={() => addToCart(item)}
-                          disabled={!item.inStock}
+                          disabled={item.product.stock_quantity === 0}
                           className={viewMode === 'list' ? 'w-32' : 'flex-1'}
                         >
                           <ShoppingCart className="h-4 w-4 mr-2" />
@@ -452,6 +491,13 @@ const Favorites = () => {
                           variant="outline"
                           size="sm"
                           className={viewMode === 'list' ? 'w-32' : ''}
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/product/${item.product.id}`)
+                            toast({
+                              title: 'Link Copied',
+                              description: 'Product link copied to clipboard',
+                            })
+                          }}
                         >
                           <Share2 className="h-4 w-4" />
                         </Button>

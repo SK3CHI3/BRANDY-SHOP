@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { DataProvider } from "@/contexts/DataContext";
+import { CartProvider } from "@/contexts/CartContext";
 // Import route guards
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminRoute from "@/components/auth/AdminRoute";
@@ -43,115 +44,161 @@ import RequestPayment from "./pages/RequestPayment";
 import Reviews from "./pages/Reviews";
 import Notifications from "./pages/Notifications";
 import Search from "./pages/Search";
+import SystemTest from "./pages/SystemTest";
+import MobileTest from "./pages/MobileTest";
 
 const queryClient = new QueryClient();
 
 const App = () => {
 
   return (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <DataProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/custom-studio" element={<CustomStudio />} />
-            <Route path="/artists" element={<Artists />} />
-            <Route path="/artist/:id" element={<ArtistProfile />} />
-            <Route path="/product/:id" element={<ProductDetails />} />
-            {/* Protected routes requiring authentication */}
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={
-              <AuthenticatedRoute>
-                <Checkout />
-              </AuthenticatedRoute>
-            } />
-            <Route path="/order-confirmation" element={
-              <AuthenticatedRoute>
-                <OrderConfirmation />
-              </AuthenticatedRoute>
-            } />
-            <Route path="/order-tracking" element={<OrderTracking />} />
-            <Route path="/track-order" element={<OrderTracking />} />
-            <Route path="/orders/:id/track" element={<OrderTracking />} />
-            <Route path="/favorites" element={<Favorites />} />
-            <Route path="/wishlist" element={<Favorites />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/reviews/:productId" element={<Reviews />} />
-            <Route path="/reviews" element={<Reviews />} />
-            <Route path="/search" element={<Search />} />
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <DataProvider>
+          <CartProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/custom-studio" element={<CustomStudio />} />
+                  <Route path="/artists" element={<Artists />} />
+                  <Route path="/artist/:id" element={<ArtistProfile />} />
+                  <Route path="/product/:id" element={<ProductDetails />} />
+                  {/* Protected routes requiring authentication */}
+                  <Route path="/profile" element={
+                    <AuthenticatedRoute>
+                      <Profile />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/cart" element={
+                    <AuthenticatedRoute>
+                      <Cart />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/checkout" element={
+                    <AuthenticatedRoute>
+                      <Checkout />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/order-confirmation" element={
+                    <AuthenticatedRoute>
+                      <OrderConfirmation />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/order-tracking" element={
+                    <AuthenticatedRoute>
+                      <OrderTracking />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/track-order" element={
+                    <AuthenticatedRoute>
+                      <OrderTracking />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/orders/:id/track" element={
+                    <AuthenticatedRoute>
+                      <OrderTracking />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/favorites" element={
+                    <AuthenticatedRoute>
+                      <Favorites />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/wishlist" element={
+                    <AuthenticatedRoute>
+                      <Favorites />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/messages" element={
+                    <AuthenticatedRoute>
+                      <Messages />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/notifications" element={
+                    <AuthenticatedRoute>
+                      <Notifications />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/reviews/:productId" element={<Reviews />} />
+                  <Route path="/reviews" element={<Reviews />} />
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/system-test" element={
+                    <AuthenticatedRoute>
+                      <SystemTest />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/mobile-test" element={<MobileTest />} />
 
-            {/* Dashboard routes with role-based access */}
-            <Route path="/customer-dashboard" element={
-              <AuthenticatedRoute>
-                <Dashboard />
-              </AuthenticatedRoute>
-            } />
-            <Route path="/artist-dashboard" element={
-              <ArtistRoute>
-                <Dashboard />
-              </ArtistRoute>
-            } />
-            <Route path="/admin-dashboard" element={
-              <AdminRoute>
-                <Dashboard />
-              </AdminRoute>
-            } />
+                  {/* Dashboard routes with role-based access */}
+                  <Route path="/customer-dashboard" element={
+                    <AuthenticatedRoute>
+                      <Dashboard />
+                    </AuthenticatedRoute>
+                  } />
+                  <Route path="/artist-dashboard" element={
+                    <ArtistRoute>
+                      <Dashboard />
+                    </ArtistRoute>
+                  } />
+                  <Route path="/admin-dashboard" element={
+                    <AdminRoute>
+                      <Dashboard />
+                    </AdminRoute>
+                  } />
 
-            {/* Artist-only routes */}
-            <Route path="/artist-studio" element={
-              <ArtistRoute>
-                <ArtistStudio />
-              </ArtistRoute>
-            } />
-            <Route path="/artist-orders" element={
-              <ArtistRoute>
-                <ArtistOrders />
-              </ArtistRoute>
-            } />
-            <Route path="/analytics" element={
-              <ArtistRoute>
-                <Analytics />
-              </ArtistRoute>
-            } />
-            <Route path="/upload-design" element={
-              <ArtistRoute>
-                <UploadDesign />
-              </ArtistRoute>
-            } />
-            <Route path="/request-payment" element={
-              <ArtistRoute>
-                <RequestPayment />
-              </ArtistRoute>
-            } />
+                  {/* Artist-only routes */}
+                  <Route path="/artist-studio" element={
+                    <ArtistRoute>
+                      <ArtistStudio />
+                    </ArtistRoute>
+                  } />
+                  <Route path="/artist-orders" element={
+                    <ArtistRoute>
+                      <ArtistOrders />
+                    </ArtistRoute>
+                  } />
+                  <Route path="/analytics" element={
+                    <ArtistRoute>
+                      <Analytics />
+                    </ArtistRoute>
+                  } />
+                  <Route path="/upload-design" element={
+                    <ArtistRoute>
+                      <UploadDesign />
+                    </ArtistRoute>
+                  } />
+                  <Route path="/request-payment" element={
+                    <ArtistRoute>
+                      <RequestPayment />
+                    </ArtistRoute>
+                  } />
 
-            {/* Admin-only routes */}
-            <Route path="/admin-panel" element={
-              <AdminRoute>
-                <AdminPanel />
-              </AdminRoute>
-            } />
+                  {/* Admin-only routes */}
+                  <Route path="/admin-panel" element={
+                    <AdminRoute>
+                      <AdminPanel />
+                    </AdminRoute>
+                  } />
 
-            {/* Public routes */}
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/size-guide" element={<SizeGuide />} />
-            <Route path="/how-it-works" element={<HowItWorksPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </DataProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+                  {/* Public routes */}
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/terms" element={<Terms />} />
+                  <Route path="/privacy" element={<Privacy />} />
+                  <Route path="/size-guide" element={<SizeGuide />} />
+                  <Route path="/how-it-works" element={<HowItWorksPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </CartProvider>
+        </DataProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 };
 

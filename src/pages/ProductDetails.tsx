@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useProduct, useReviews } from '@/hooks/useData'
 import { useAuth } from '@/contexts/AuthContext'
+import { useCart } from '@/contexts/CartContext'
 import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -25,6 +26,7 @@ import {
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>()
   const { user } = useAuth()
+  const { addToCart: addToCartContext } = useCart()
   const { product, loading, error } = useProduct(id!)
   const { reviews } = useReviews(id!)
   const [selectedImage, setSelectedImage] = useState(0)
@@ -44,17 +46,7 @@ const ProductDetails = () => {
 
     setAddingToCart(true)
     try {
-      const { error } = await supabase
-        .from('cart_items')
-        .upsert({
-          user_id: user.id,
-          product_id: id!,
-          quantity,
-          updated_at: new Date().toISOString()
-        })
-
-      if (error) throw error
-
+      await addToCartContext(id!, quantity)
       toast({
         title: 'Added to cart',
         description: `${product?.title} has been added to your cart`,

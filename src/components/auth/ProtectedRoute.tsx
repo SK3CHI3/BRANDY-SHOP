@@ -41,7 +41,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check if authentication is required
   if (requireAuth && !user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location, showAuth: true }} replace />;
   }
 
   // Check if specific role is required

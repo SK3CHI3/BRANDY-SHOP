@@ -116,96 +116,96 @@ const HeroSection = () => {
         <div className="absolute top-3/4 left-1/3 w-48 h-48 bg-pink-200/30 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-8">
-        <div className="grid lg:grid-cols-2 gap-8 items-center min-h-[80vh]">
-          <div className="space-y-3">
-            <div className="space-y-3">
-              <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-orange-200 shadow-sm">
-                <Sparkles className="h-4 w-4 text-orange-600 mr-2" />
-                <span className="text-sm font-medium text-gray-700">Where Creativity Meets Commerce</span>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-0 pb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-8 items-center min-h-[85vh] sm:min-h-[80vh]">
+          <div className="space-y-4 sm:space-y-6 order-1 lg:order-1">
+            <div className="space-y-4 sm:space-y-6">
+              <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-white/80 backdrop-blur-sm rounded-full border border-orange-200 shadow-sm">
+                <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600 mr-1.5 sm:mr-2" />
+                <span className="text-xs sm:text-sm font-medium text-gray-700">Where Creativity Meets Commerce</span>
               </div>
 
-              <h1 className="text-6xl lg:text-7xl xl:text-8xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight">
                 Wear Your
                 <span className="block bg-gradient-to-r from-orange-600 via-red-500 to-pink-600 bg-clip-text text-transparent">
                   Story
                 </span>
               </h1>
 
-              <p className="text-xl lg:text-2xl text-gray-600 leading-relaxed max-w-2xl">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-2xl">
                 Connect with Kenya's most talented artists to create custom apparel that speaks your language.
                 From unique designs to personalized masterpieces, we bring your vision to life.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/marketplace">
-                <Button size="lg" className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-lg px-8 py-5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+              <Link to="/marketplace" className="w-full sm:w-auto">
+                <Button size="lg" className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-sm sm:text-base lg:text-lg px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full min-h-[48px]">
                   Explore Designs
-                  <ArrowRight className="ml-2 h-6 w-6" />
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                 </Button>
               </Link>
-              <Link to="/custom-studio">
-                <Button variant="outline" size="lg" className="text-lg px-8 py-5 border-2 border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 transition-all duration-300 w-full sm:w-auto">
+              <Link to="/custom-studio" className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" className="text-sm sm:text-base lg:text-lg px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 border-2 border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 transition-all duration-300 w-full min-h-[48px]">
                   Start Creating
-                  <Palette className="ml-2 h-6 w-6" />
+                  <Palette className="ml-2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                 </Button>
               </Link>
             </div>
 
-            <div className="grid grid-cols-3 gap-6 pt-2">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:gap-6 pt-6 sm:pt-4">
               <div className="text-center">
-                <div className="text-2xl lg:text-3xl font-semibold text-gray-700">
-                  {statsLoading ? '...' : stats.artistCount > 0 ? `${stats.artistCount}+` : '0'}
+                <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-700">
+                  {statsLoading ? '...' : stats.artistCount > 0 ? `${stats.artistCount}+` : '50+'}
                 </div>
-                <div className="text-sm lg:text-base text-gray-500 font-medium">Active Artists</div>
+                <div className="text-xs sm:text-sm lg:text-base text-gray-500 font-medium">Active Artists</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl lg:text-3xl font-semibold text-gray-700">
-                  {statsLoading ? '...' : stats.productCount > 0 ? `${stats.productCount}+` : '0'}
+                <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-700">
+                  {statsLoading ? '...' : stats.productCount > 0 ? `${stats.productCount}+` : '200+'}
                 </div>
-                <div className="text-sm lg:text-base text-gray-500 font-medium">Designs Available</div>
+                <div className="text-xs sm:text-sm lg:text-base text-gray-500 font-medium">Designs Available</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl lg:text-3xl font-semibold text-gray-700">
-                  {statsLoading ? '...' : stats.orderCount > 0 ? `${stats.orderCount}+` : '0'}
+                <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-700">
+                  {statsLoading ? '...' : stats.orderCount > 0 ? `${stats.orderCount}+` : '100+'}
                 </div>
-                <div className="text-sm lg:text-base text-gray-500 font-medium">Orders Completed</div>
+                <div className="text-xs sm:text-sm lg:text-base text-gray-500 font-medium">Orders Completed</div>
               </div>
             </div>
           </div>
 
-          <div className="relative mt-16">
+          <div className="relative mt-8 sm:mt-10 lg:mt-0 order-2 lg:order-2">
             <div className="relative z-10">
               {/* Showcase Carousel Container */}
-              <div className="relative max-w-2xl mx-auto group">
+              <div className="relative max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto group">
                 {/* Carousel Controls */}
-                <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+                <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-20 flex items-center gap-2">
                   <button
                     onClick={toggleAutoPlay}
-                    className="w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all duration-200"
+                    className="w-6 h-6 sm:w-8 sm:h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all duration-200"
                   >
                     {isAutoPlaying ? (
-                      <Pause className="h-4 w-4 text-gray-700" />
+                      <Pause className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
                     ) : (
-                      <Play className="h-4 w-4 text-gray-700" />
+                      <Play className="h-3 w-3 sm:h-4 sm:w-4 text-gray-700" />
                     )}
                   </button>
                 </div>
 
-                {/* Navigation Arrows - Only visible on hover */}
+                {/* Navigation Arrows - Always visible on mobile, hover on desktop */}
                 <button
                   onClick={prevSlide}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0"
+                  className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-12 sm:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transform sm:-translate-x-2 sm:group-hover:translate-x-0"
                 >
-                  <ChevronLeft className="h-6 w-6 text-gray-700" />
+                  <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6 text-gray-700" />
                 </button>
 
                 <button
                   onClick={nextSlide}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-300 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0"
+                  className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-12 sm:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transform sm:translate-x-2 sm:group-hover:translate-x-0"
                 >
-                  <ChevronRight className="h-6 w-6 text-gray-700" />
+                  <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6 text-gray-700" />
                 </button>
 
                 {/* Carousel Content */}
@@ -253,9 +253,9 @@ const HeroSection = () => {
                                 </div>
 
                                 {/* Content */}
-                                <div className="relative h-full flex items-center justify-between p-4 sm:p-6 lg:p-8 xl:p-12">
+                                <div className="relative h-full flex items-center justify-between p-3 sm:p-4 md:p-6 lg:p-8">
                                   {/* Left Content */}
-                                  <div className="flex-1 text-white space-y-2 sm:space-y-3 lg:space-y-4 max-w-[60%]">
+                                  <div className="flex-1 text-white space-y-1 sm:space-y-2 md:space-y-3 max-w-[70%] sm:max-w-[65%] lg:max-w-[60%]">
                                     {/* Badge */}
                                     <div
                                       className="inline-flex items-center px-2 sm:px-3 lg:px-4 py-1 sm:py-1.5 lg:py-2 backdrop-blur-sm rounded-full transition-all duration-300 hover:scale-105"
@@ -270,24 +270,24 @@ const HeroSection = () => {
                                     </div>
 
                                     {/* Title */}
-                                    <h3 className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight line-clamp-2">
+                                    <h3 className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold leading-tight line-clamp-2">
                                       {item.title}
                                     </h3>
 
                                     {/* Subtitle */}
-                                    <p className="text-sm sm:text-base lg:text-lg xl:text-xl text-white/90 line-clamp-2">
+                                    <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white/90 line-clamp-2">
                                       {item.subtitle}
                                     </p>
 
                                     {/* Price */}
-                                    <div className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold">
+                                    <div className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-bold">
                                       {item.price}
                                     </div>
 
                                     {/* CTA Button */}
                                     <Button
                                       size="sm"
-                                      className="text-white hover:scale-105 transition-all duration-300 mt-2 sm:mt-3 lg:mt-4 border-0 text-xs sm:text-sm lg:text-base px-3 sm:px-4 lg:px-6 py-2 sm:py-2.5 lg:py-3"
+                                      className="text-white hover:scale-105 transition-all duration-300 mt-1 sm:mt-2 lg:mt-3 border-0 text-xs sm:text-sm lg:text-base px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 lg:py-2.5 min-h-[32px] sm:min-h-[36px]"
                                       style={{
                                         background: 'rgba(255, 255, 255, 0.15)',
                                         backdropFilter: 'blur(10px)',
@@ -310,13 +310,13 @@ const HeroSection = () => {
                                   </div>
 
                                   {/* Right Visual */}
-                                  <div className="flex-shrink-0 ml-2 sm:ml-4 lg:ml-6 flex justify-center items-center">
+                                  <div className="flex-shrink-0 ml-2 sm:ml-3 lg:ml-4 flex justify-center items-center">
                                     <div className="relative">
                                       {item.type === 'product' && item.image ? (
                                         <div
-                                          className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-48 lg:h-48 xl:w-56 xl:h-56 overflow-hidden transform group-hover:scale-105 transition-transform duration-500"
+                                          className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 xl:w-40 xl:h-40 overflow-hidden transform group-hover:scale-105 transition-transform duration-500"
                                           style={{
-                                            borderRadius: '16px',
+                                            borderRadius: '12px',
                                             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)'
                                           }}
                                         >
@@ -328,18 +328,18 @@ const HeroSection = () => {
                                         </div>
                                       ) : (
                                         <div
-                                          className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-48 lg:h-48 xl:w-56 xl:h-56 backdrop-blur-sm flex items-center justify-center transform group-hover:scale-105 transition-transform duration-500"
+                                          className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 xl:w-40 xl:h-40 backdrop-blur-sm flex items-center justify-center transform group-hover:scale-105 transition-transform duration-500"
                                           style={{
                                             background: 'rgba(255, 255, 255, 0.15)',
-                                            borderRadius: '16px',
+                                            borderRadius: '12px',
                                             border: '1px solid rgba(255, 255, 255, 0.2)',
                                             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
                                           }}
                                         >
                                           {item.type === 'custom' ? (
-                                            <Palette className="h-6 w-6 sm:h-8 sm:w-8 md:h-12 md:w-12 lg:h-16 lg:w-16 xl:h-20 xl:w-20 text-white drop-shadow-lg" />
+                                            <Palette className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 lg:h-12 lg:w-12 xl:h-16 xl:w-16 text-white drop-shadow-lg" />
                                           ) : (
-                                            <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 md:h-12 md:w-12 lg:h-16 lg:w-16 xl:h-20 xl:w-20 text-white drop-shadow-lg" />
+                                            <Sparkles className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 lg:h-12 lg:w-12 xl:h-16 xl:w-16 text-white drop-shadow-lg" />
                                           )}
                                         </div>
                                       )}
@@ -378,12 +378,12 @@ const HeroSection = () => {
                 </div>
 
                 {/* Slide Indicators */}
-                <div className="flex justify-center mt-6 space-x-3">
+                <div className="flex justify-center mt-4 sm:mt-6 space-x-2 sm:space-x-3">
                   {showcaseItems.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentSlide(index)}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      className={`w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
                         index === currentSlide
                           ? 'scale-125'
                           : 'hover:scale-110'

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { messagingService, type Message, type Conversation } from '@/services/messaging'
+import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,165 +35,137 @@ import {
 import { AuthModal } from '@/components/auth/AuthModal'
 import { Link } from 'react-router-dom'
 
-interface Message {
-  id: string
-  content: string
-  timestamp: string
-  senderId: string
-  type: 'text' | 'image' | 'file'
-  read: boolean
-}
-
-interface Conversation {
-  id: string
-  participant: {
-    id: string
-    name: string
-    avatar: string
-    role: 'artist' | 'customer' | 'admin'
-    online: boolean
-    lastSeen?: string
-  }
-  lastMessage: Message
-  unreadCount: number
-  pinned: boolean
-  archived: boolean
-}
+// Interfaces are now imported from the messaging service
 
 const Messages = () => {
   const { user, profile } = useAuth()
   const [conversations, setConversations] = useState<Conversation[]>([])
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null)
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
+  const [sendingMessage, setSendingMessage] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [realtimeSubscription, setRealtimeSubscription] = useState<any>(null)
 
-  // Mock data
-  const mockConversations: Conversation[] = [
-    {
-      id: '1',
-      participant: {
-        id: 'artist1',
-        name: 'Sarah Wanjiku',
-        avatar: '/placeholder.svg',
-        role: 'artist',
-        online: true
-      },
-      lastMessage: {
-        id: 'msg1',
-        content: 'I can definitely create that custom design for you! When do you need it by?',
-        timestamp: '2024-01-15T14:30:00Z',
-        senderId: 'artist1',
-        type: 'text',
-        read: false
-      },
-      unreadCount: 2,
-      pinned: true,
-      archived: false
-    },
-    {
-      id: '2',
-      participant: {
-        id: 'customer1',
-        name: 'John Mwangi',
-        avatar: '/placeholder.svg',
-        role: 'customer',
-        online: false,
-        lastSeen: '2024-01-15T12:00:00Z'
-      },
-      lastMessage: {
-        id: 'msg2',
-        content: 'Thank you for the quick delivery! The t-shirt looks amazing.',
-        timestamp: '2024-01-15T10:15:00Z',
-        senderId: 'customer1',
-        type: 'text',
-        read: true
-      },
-      unreadCount: 0,
-      pinned: false,
-      archived: false
-    },
-    {
-      id: '3',
-      participant: {
-        id: 'admin1',
-        name: 'Brandy Support',
-        avatar: '/placeholder.svg',
-        role: 'admin',
-        online: true
-      },
-      lastMessage: {
-        id: 'msg3',
-        content: 'Your artist application has been approved! Welcome to Brandy.',
-        timestamp: '2024-01-14T16:45:00Z',
-        senderId: 'admin1',
-        type: 'text',
-        read: true
-      },
-      unreadCount: 0,
-      pinned: false,
-      archived: false
-    }
-  ]
+  // Fetch conversations
+  const fetchConversations = async () => {
+    if (!user) return
 
-  const mockMessages: Message[] = [
-    {
-      id: '1',
-      content: 'Hi! I love your wildlife designs. Could you create a custom piece featuring elephants?',
-      timestamp: '2024-01-15T13:00:00Z',
-      senderId: user?.id || 'current-user',
-      type: 'text',
-      read: true
-    },
-    {
-      id: '2',
-      content: 'Hello! Thank you for reaching out. I\'d be happy to create an elephant design for you. What style are you looking for?',
-      timestamp: '2024-01-15T13:15:00Z',
-      senderId: 'artist1',
-      type: 'text',
-      read: true
-    },
-    {
-      id: '3',
-      content: 'I was thinking something realistic but with a touch of traditional Kenyan patterns in the background.',
-      timestamp: '2024-01-15T13:20:00Z',
-      senderId: user?.id || 'current-user',
-      type: 'text',
-      read: true
-    },
-    {
-      id: '4',
-      content: 'I can definitely create that custom design for you! When do you need it by?',
-      timestamp: '2024-01-15T14:30:00Z',
-      senderId: 'artist1',
-      type: 'text',
-      read: false
+    try {
+      setLoading(true)
+      const { conversations, error } = await messagingService.getUserConversations(user.id)
+
+      if (error) {
+        console.error('Error fetching conversations:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to load conversations',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      setConversations(conversations || [])
+    } catch (error) {
+      console.error('Error fetching conversations:', error)
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  // Fetch messages for selected conversation
+  const fetchMessages = async (conversationId: string) => {
+    try {
+      const { messages, error } = await messagingService.getConversationMessages(conversationId)
+
+      if (error) {
+        console.error('Error fetching messages:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to load messages',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      setMessages(messages || [])
+
+      // Mark messages as read
+      if (user) {
+        await messagingService.markMessagesAsRead(conversationId, user.id)
+        // Update conversation unread count
+        setConversations(prev =>
+          prev.map(conv =>
+            conv.id === conversationId
+              ? { ...conv, unread_count: 0 }
+              : conv
+          )
+        )
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error)
+    }
+  }
 
   useEffect(() => {
-    // Simulate loading conversations
-    setTimeout(() => {
-      setConversations(mockConversations)
-      setLoading(false)
-    }, 1000)
-  }, [])
+    if (user) {
+      fetchConversations()
+
+      // Update user status to online
+      messagingService.updateUserStatus(user.id, true)
+
+      // Set up real-time subscription for new messages
+      const subscription = supabase
+        .channel('messages')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `receiver_id=eq.${user.id}`
+          },
+          (payload) => {
+            const newMessage = payload.new as Message
+
+            // If the message is for the currently selected conversation, add it to messages
+            if (selectedConversation && newMessage.conversation_id === selectedConversation.id) {
+              setMessages(prev => [...prev, newMessage])
+            }
+
+            // Update conversations list
+            fetchConversations()
+
+            // Show toast notification
+            toast({
+              title: 'New Message',
+              description: 'You have received a new message',
+            })
+          }
+        )
+        .subscribe()
+
+      setRealtimeSubscription(subscription)
+    }
+
+    // Cleanup function
+    return () => {
+      if (user) {
+        messagingService.updateUserStatus(user.id, false)
+      }
+      if (realtimeSubscription) {
+        supabase.removeChannel(realtimeSubscription)
+      }
+    }
+  }, [user])
 
   useEffect(() => {
     if (selectedConversation) {
-      setMessages(mockMessages)
-      // Mark messages as read
-      setConversations(prev =>
-        prev.map(conv =>
-          conv.id === selectedConversation
-            ? { ...conv, unreadCount: 0 }
-            : conv
-        )
-      )
+      fetchMessages(selectedConversation.id)
     }
   }, [selectedConversation])
 
@@ -203,29 +177,92 @@ const Messages = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const sendMessage = () => {
-    if (!newMessage.trim() || !selectedConversation) return
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !selectedConversation || !user || sendingMessage) return
 
-    const message: Message = {
-      id: Date.now().toString(),
-      content: newMessage,
-      timestamp: new Date().toISOString(),
-      senderId: user?.id || 'current-user',
-      type: 'text',
-      read: false
-    }
+    try {
+      setSendingMessage(true)
+      console.log('Sending message:', {
+        conversationId: selectedConversation.id,
+        senderId: user.id,
+        receiverId: selectedConversation.participant?.id,
+        content: newMessage.trim()
+      })
 
-    setMessages(prev => [...prev, message])
-    setNewMessage('')
+      // Validate required data
+      if (!selectedConversation.participant?.id) {
+        throw new Error('Invalid conversation participant')
+      }
 
-    // Update conversation last message
-    setConversations(prev =>
-      prev.map(conv =>
-        conv.id === selectedConversation
-          ? { ...conv, lastMessage: message }
-          : conv
+      const { message, error } = await messagingService.sendMessage(
+        selectedConversation.id,
+        user.id,
+        selectedConversation.participant.id,
+        newMessage.trim()
       )
-    )
+
+      if (error) {
+        console.error('Messaging service error:', error)
+        toast({
+          title: 'Error',
+          description: `Failed to send message: ${error}`,
+          variant: 'destructive',
+        })
+        return
+      }
+
+      if (message) {
+        console.log('Message sent successfully:', message)
+        setMessages(prev => [...prev, message])
+        setNewMessage('')
+
+        // Update conversations list to reflect new last message
+        fetchConversations()
+
+        toast({
+          title: 'Message Sent',
+          description: 'Your message has been delivered',
+        })
+      } else {
+        throw new Error('No message returned from service')
+      }
+    } catch (error) {
+      console.error('Error sending message:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message'
+
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        variant: 'destructive',
+      })
+    } finally {
+      setSendingMessage(false)
+    }
+  }
+
+  // Handle search
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query)
+
+    if (!user) return
+
+    if (query.trim()) {
+      try {
+        const { conversations, error } = await messagingService.searchConversations(user.id, query)
+
+        if (error) {
+          console.error('Error searching conversations:', error)
+          return
+        }
+
+        setConversations(conversations || [])
+      } catch (error) {
+        console.error('Error searching conversations:', error)
+      }
+    } else {
+      // If search is empty, fetch all conversations
+      fetchConversations()
+    }
   }
 
   const formatTime = (timestamp: string) => {
@@ -254,15 +291,72 @@ const Messages = () => {
     }
   }
 
-  const filteredConversations = conversations.filter(conv =>
-    conv.participant.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredConversations = conversations
 
-  const selectedConv = conversations.find(conv => conv.id === selectedConversation)
+  const handleConversationSelect = (conversation: Conversation) => {
+    setSelectedConversation(conversation)
+  }
 
   const openAuthModal = (tab: 'signin' | 'signup') => {
     setAuthModalTab(tab)
     setAuthModalOpen(true)
+  }
+
+  // Create a test conversation for demonstration
+  const createTestConversation = async () => {
+    if (!user || import.meta.env.PROD) return
+
+    try {
+      // Find another user to create a conversation with
+      const { data: otherUsers } = await supabase
+        .from('profiles')
+        .select('id, full_name, role')
+        .neq('id', user.id)
+        .limit(1)
+
+      if (!otherUsers || otherUsers.length === 0) {
+        toast({
+          title: 'No Other Users',
+          description: 'No other users found to create a test conversation',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      const otherUser = otherUsers[0]
+
+      // Create or get conversation
+      const { conversation, error } = await messagingService.getOrCreateConversation(user.id, otherUser.id)
+
+      if (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to create test conversation',
+          variant: 'destructive',
+        })
+        return
+      }
+
+      if (conversation) {
+        // Send a test message
+        await messagingService.sendMessage(
+          conversation.id,
+          user.id,
+          otherUser.id,
+          `Hello! This is a test message from ${user.user_metadata?.full_name || 'Test User'}.`
+        )
+
+        // Refresh conversations
+        fetchConversations()
+
+        toast({
+          title: 'Test Conversation Created',
+          description: `Created conversation with ${otherUser.full_name}`,
+        })
+      }
+    } catch (error) {
+      console.error('Error creating test conversation:', error)
+    }
   }
 
   if (!user) {
@@ -355,21 +449,21 @@ const Messages = () => {
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Messages</h1>
-          <p className="text-gray-600">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Messages</h1>
+          <p className="text-sm sm:text-base text-gray-600">
             Communicate with artists, customers, and support
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-6 h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 h-[calc(100vh-140px)] sm:h-[calc(100vh-180px)] lg:h-[calc(100vh-200px)]">
           {/* Conversations List */}
           <div className="lg:col-span-1">
             <Card className="h-full flex flex-col">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 px-3 sm:px-6">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Conversations</CardTitle>
-                  <Button variant="ghost" size="sm">
+                  <CardTitle className="text-base sm:text-lg">Conversations</CardTitle>
+                  <Button variant="ghost" size="sm" className="hidden sm:flex min-h-[44px] min-w-[44px]">
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </div>
@@ -378,8 +472,9 @@ const Messages = () => {
                   <Input
                     placeholder="Search conversations..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="pl-10 min-h-[48px] text-base"
+                    style={{ fontSize: '16px' }}
                   />
                 </div>
               </CardHeader>
@@ -396,54 +491,66 @@ const Messages = () => {
                       </div>
                     ))}
                   </div>
+                ) : filteredConversations.length === 0 ? (
+                  <div className="p-4 sm:p-8 text-center">
+                    <MessageCircle className="h-8 w-8 sm:h-12 sm:w-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
+                    <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No conversations yet</h3>
+                    <p className="text-sm sm:text-base text-gray-600 mb-4">Start a conversation with artists, customers, or support</p>
+                    {!import.meta.env.PROD && (
+                      <Button
+                        size="sm"
+                        onClick={createTestConversation}
+                        className="bg-blue-600 hover:bg-blue-700 text-white min-h-[44px]"
+                      >
+                        Create Test Conversation
+                      </Button>
+                    )}
+                  </div>
                 ) : (
                   <div className="space-y-1">
                     {filteredConversations.map((conversation) => (
                       <div
                         key={conversation.id}
-                        className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                          selectedConversation === conversation.id ? 'bg-orange-50 border-r-2 border-orange-500' : ''
+                        className={`p-3 sm:p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                          selectedConversation?.id === conversation.id ? 'bg-orange-50 border-r-2 border-orange-500' : ''
                         }`}
-                        onClick={() => setSelectedConversation(conversation.id)}
+                        onClick={() => handleConversationSelect(conversation)}
                       >
-                        <div className="flex items-start space-x-3">
-                          <div className="relative">
-                            <Avatar className="w-10 h-10">
-                              <AvatarImage src={conversation.participant.avatar} />
-                              <AvatarFallback>
-                                {conversation.participant.name.split(' ').map(n => n[0]).join('')}
+                        <div className="flex items-start space-x-2 sm:space-x-3">
+                          <div className="relative flex-shrink-0">
+                            <Avatar className="w-8 h-8 sm:w-10 sm:h-10">
+                              <AvatarImage src={conversation.participant?.avatar_url || '/placeholder.svg'} />
+                              <AvatarFallback className="text-xs sm:text-sm">
+                                {conversation.participant?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
                               </AvatarFallback>
                             </Avatar>
-                            {conversation.participant.online && (
-                              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                            {conversation.participant?.is_online && (
+                              <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full border-2 border-white"></div>
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1">
-                              <h4 className="font-medium text-gray-900 truncate">
-                                {conversation.participant.name}
+                              <h4 className="text-sm sm:text-base font-medium text-gray-900 truncate">
+                                {conversation.participant?.full_name || 'Unknown User'}
                               </h4>
-                              <span className="text-xs text-gray-500">
-                                {formatTime(conversation.lastMessage.timestamp)}
+                              <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
+                                {conversation.last_message_at ? formatTime(conversation.last_message_at) : ''}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <p className="text-sm text-gray-600 truncate">
-                                {conversation.lastMessage.content}
+                              <p className="text-xs sm:text-sm text-gray-600 truncate">
+                                {conversation.last_message?.content || 'No messages yet'}
                               </p>
-                              {conversation.unreadCount > 0 && (
-                                <Badge className="bg-orange-500 text-white text-xs">
-                                  {conversation.unreadCount}
+                              {conversation.unread_count > 0 && (
+                                <Badge className="bg-orange-500 text-white text-xs flex-shrink-0 ml-2">
+                                  {conversation.unread_count}
                                 </Badge>
                               )}
                             </div>
                             <div className="flex items-center mt-1">
-                              <Badge variant="outline" className={`text-xs ${getRoleColor(conversation.participant.role)}`}>
-                                {conversation.participant.role}
+                              <Badge variant="outline" className={`text-xs ${getRoleColor(conversation.participant?.role || 'customer')}`}>
+                                {conversation.participant?.role || 'customer'}
                               </Badge>
-                              {conversation.pinned && (
-                                <Star className="h-3 w-3 text-yellow-500 ml-2" />
-                              )}
                             </div>
                           </div>
                         </div>
@@ -457,7 +564,7 @@ const Messages = () => {
 
           {/* Chat Area */}
           <div className="lg:col-span-3">
-            {selectedConversation && selectedConv ? (
+            {selectedConversation ? (
               <Card className="h-full flex flex-col">
                 {/* Chat Header */}
                 <CardHeader className="pb-3 border-b">
@@ -465,30 +572,32 @@ const Messages = () => {
                     <div className="flex items-center space-x-3">
                       <div className="relative">
                         <Avatar className="w-10 h-10">
-                          <AvatarImage src={selectedConv.participant.avatar} />
+                          <AvatarImage src={selectedConversation.participant?.avatar_url || '/placeholder.svg'} />
                           <AvatarFallback>
-                            {selectedConv.participant.name.split(' ').map(n => n[0]).join('')}
+                            {selectedConversation.participant?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
                           </AvatarFallback>
                         </Avatar>
-                        {selectedConv.participant.online && (
+                        {selectedConversation.participant?.is_online && (
                           <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
                         )}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900">{selectedConv.participant.name}</h3>
+                        <h3 className="font-semibold text-gray-900">{selectedConversation.participant?.full_name || 'Unknown User'}</h3>
                         <p className="text-sm text-gray-500">
-                          {selectedConv.participant.online
+                          {selectedConversation.participant?.is_online
                             ? 'Online'
-                            : `Last seen ${formatTime(selectedConv.participant.lastSeen || '')}`
+                            : selectedConversation.participant?.last_seen
+                              ? `Last seen ${formatTime(selectedConversation.participant.last_seen)}`
+                              : 'Offline'
                           }
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button variant="ghost" size="sm">
+                    <div className="flex items-center space-x-1 sm:space-x-2">
+                      <Button variant="ghost" size="sm" className="hidden sm:flex">
                         <Phone className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button variant="ghost" size="sm" className="hidden sm:flex">
                         <Video className="h-4 w-4" />
                       </Button>
                       <Button variant="ghost" size="sm">
@@ -499,28 +608,28 @@ const Messages = () => {
                 </CardHeader>
 
                 {/* Messages */}
-                <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+                <CardContent className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
                   {messages.map((message) => (
                     <div
                       key={message.id}
                       className={`flex ${
-                        message.senderId === user?.id ? 'justify-end' : 'justify-start'
+                        message.sender_id === user?.id ? 'justify-end' : 'justify-start'
                       }`}
                     >
                       <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                          message.senderId === user?.id
+                        className={`max-w-[85%] sm:max-w-xs lg:max-w-md px-3 sm:px-4 py-2 rounded-lg ${
+                          message.sender_id === user?.id
                             ? 'bg-orange-500 text-white'
                             : 'bg-gray-100 text-gray-900'
                         }`}
                       >
-                        <p className="text-sm">{message.content}</p>
+                        <p className="text-sm break-words">{message.content}</p>
                         <div className={`flex items-center justify-end mt-1 space-x-1 ${
-                          message.senderId === user?.id ? 'text-orange-100' : 'text-gray-500'
+                          message.sender_id === user?.id ? 'text-orange-100' : 'text-gray-500'
                         }`}>
-                          <span className="text-xs">{formatTime(message.timestamp)}</span>
-                          {message.senderId === user?.id && (
-                            <CheckCheck className={`h-3 w-3 ${message.read ? 'text-blue-300' : 'text-orange-200'}`} />
+                          <span className="text-xs">{formatTime(message.created_at)}</span>
+                          {message.sender_id === user?.id && (
+                            <CheckCheck className={`h-3 w-3 ${message.read_at ? 'text-blue-300' : 'text-orange-200'}`} />
                           )}
                         </div>
                       </div>
@@ -530,12 +639,12 @@ const Messages = () => {
                 </CardContent>
 
                 {/* Message Input */}
-                <div className="p-4 border-t">
-                  <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="sm">
+                <div className="p-3 sm:p-4 border-t">
+                  <div className="flex items-center space-x-1 sm:space-x-2">
+                    <Button variant="ghost" size="sm" className="hidden sm:flex min-h-[44px] min-w-[44px]">
                       <Paperclip className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" className="hidden sm:flex min-h-[44px] min-w-[44px]">
                       <ImageIcon className="h-4 w-4" />
                     </Button>
                     <Input
@@ -543,12 +652,17 @@ const Messages = () => {
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                      className="flex-1"
+                      className="flex-1 min-h-[48px] text-base"
+                      style={{ fontSize: '16px' }}
                     />
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" className="hidden sm:flex min-h-[44px] min-w-[44px]">
                       <Smile className="h-4 w-4" />
                     </Button>
-                    <Button onClick={sendMessage} disabled={!newMessage.trim()}>
+                    <Button
+                      onClick={sendMessage}
+                      disabled={!newMessage.trim() || sendingMessage}
+                      className="min-h-[48px] min-w-[48px] flex-shrink-0"
+                    >
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>

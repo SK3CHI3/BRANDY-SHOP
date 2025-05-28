@@ -11,40 +11,97 @@ interface DataContextType {
   // Stats
   stats: Stats
   statsLoading: boolean
-  
+
   // Featured Products
   featuredProducts: Product[]
   featuredLoading: boolean
-  
+
   // Products
   products: Product[]
   productsLoading: boolean
-  
+
   // Methods
   refreshStats: () => Promise<void>
   refreshFeaturedProducts: () => Promise<void>
   refreshProducts: (filters?: { category?: string; artist?: string; featured?: boolean }) => Promise<void>
+  forceRefreshAll: () => Promise<void>
+  invalidateProductCache: () => void
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined)
 
-// Global cache with timestamps
-let globalCache = {
-  stats: { data: null as Stats | null, timestamp: 0 },
-  featuredProducts: { data: [] as Product[], timestamp: 0 },
-  products: { data: [] as Product[], timestamp: 0, filters: null as any }
+// Cache utilities for localStorage persistence
+const CACHE_KEYS = {
+  STATS: 'brandy_cache_stats',
+  FEATURED_PRODUCTS: 'brandy_cache_featured',
+  PRODUCTS: 'brandy_cache_products'
 }
 
 const CACHE_DURATION = 30000 // 30 seconds
 
+// Persistent cache with localStorage backup
+const getCache = (key: string, defaultValue: any) => {
+  try {
+    const cached = localStorage.getItem(key)
+    if (cached) {
+      const parsed = JSON.parse(cached)
+      // Check if cache is still valid
+      if (Date.now() - parsed.timestamp < CACHE_DURATION) {
+        return parsed
+      }
+    }
+  } catch (error) {
+    console.warn('Cache read error:', error)
+  }
+  return defaultValue
+}
+
+const setCache = (key: string, data: any, timestamp: number) => {
+  try {
+    localStorage.setItem(key, JSON.stringify({ data, timestamp }))
+  } catch (error) {
+    console.warn('Cache write error:', error)
+  }
+}
+
+const clearCache = (key: string) => {
+  try {
+    localStorage.removeItem(key)
+  } catch (error) {
+    console.warn('Cache clear error:', error)
+  }
+}
+
+// Global cache with localStorage persistence
+let globalCache = {
+  stats: getCache(CACHE_KEYS.STATS, { data: null as Stats | null, timestamp: 0 }),
+  featuredProducts: getCache(CACHE_KEYS.FEATURED_PRODUCTS, { data: [] as Product[], timestamp: 0 }),
+  products: getCache(CACHE_KEYS.PRODUCTS, { data: [] as Product[], timestamp: 0, filters: null as any })
+}
+
+// Initialize state from cache
+const initializeFromCache = () => {
+  const statsCache = getCache(CACHE_KEYS.STATS, { data: null, timestamp: 0 })
+  const featuredCache = getCache(CACHE_KEYS.FEATURED_PRODUCTS, { data: [], timestamp: 0 })
+  const productsCache = getCache(CACHE_KEYS.PRODUCTS, { data: [], timestamp: 0, filters: null })
+
+  return {
+    stats: statsCache.data || { artistCount: 0, productCount: 0, orderCount: 0 },
+    featuredProducts: featuredCache.data || [],
+    products: productsCache.data || []
+  }
+}
+
 export const DataProvider = ({ children }: { children: ReactNode }) => {
-  const [stats, setStats] = useState<Stats>({ artistCount: 0, productCount: 0, orderCount: 0 })
+  const cachedData = initializeFromCache()
+
+  const [stats, setStats] = useState<Stats>(cachedData.stats)
   const [statsLoading, setStatsLoading] = useState(true)
-  
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>(cachedData.featuredProducts)
   const [featuredLoading, setFeaturedLoading] = useState(true)
-  
-  const [products, setProducts] = useState<Product[]>([])
+
+  const [products, setProducts] = useState<Product[]>(cachedData.products)
   const [productsLoading, setProductsLoading] = useState(true)
 
   // Optimized stats fetching
@@ -76,8 +133,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         orderCount: orderResult.error ? 0 : (orderResult.count || 0)
       }
 
-      // Update cache
+      // Update cache with localStorage persistence
       globalCache.stats = { data: statsData, timestamp: now }
+      setCache(CACHE_KEYS.STATS, statsData, now)
       setStats(statsData)
       console.log('📊 Stats updated:', statsData)
     } catch (error) {
@@ -139,8 +197,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           reviewCount: 0
         })) as Product[]
 
-        // Update cache
+        // Update cache with localStorage persistence
         globalCache.featuredProducts = { data: productsWithBasicDetails, timestamp: now }
+        setCache(CACHE_KEYS.FEATURED_PRODUCTS, productsWithBasicDetails, now)
         setFeaturedProducts(productsWithBasicDetails)
         console.log('⭐ Featured products updated:', productsWithBasicDetails.length)
       }
@@ -212,8 +271,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           } : null
         })) as Product[]
 
-        // Update cache
+        // Update cache with localStorage persistence
         globalCache.products = { data: productsWithBasicDetails, timestamp: now, filters }
+        setCache(CACHE_KEYS.PRODUCTS, { data: productsWithBasicDetails, filters }, now)
         setProducts(productsWithBasicDetails)
         console.log('🛍️ Products updated:', productsWithBasicDetails.length)
       }
@@ -228,23 +288,88 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   // Initialize data on mount
   useEffect(() => {
     console.log('🚀 DataProvider initializing...')
-    
+
     // Stagger the requests to avoid overwhelming the database
     const initializeData = async () => {
       await refreshStats()
-      
+
       // Small delay between requests
       setTimeout(async () => {
         await refreshFeaturedProducts()
       }, 100)
-      
+
       setTimeout(async () => {
-        await refreshProducts({ featured: true })
+        await refreshProducts() // Load all products, not just featured
       }, 200)
     }
 
     initializeData()
+
+    // Set up real-time subscription for products
+    const subscription = supabase
+      .channel('products-changes')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'products' },
+        (payload) => {
+          console.log('🔄 Product change detected:', payload.eventType)
+          // Clear cache and refresh products when changes occur
+          globalCache.products = { data: [], timestamp: 0, filters: {} }
+          globalCache.featuredProducts = { data: [], timestamp: 0 }
+
+          clearCache(CACHE_KEYS.PRODUCTS)
+          clearCache(CACHE_KEYS.FEATURED_PRODUCTS)
+
+          // Refresh data after a short delay to allow DB to settle
+          setTimeout(() => {
+            refreshProducts()
+            refreshFeaturedProducts()
+          }, 1000)
+        }
+      )
+      .subscribe()
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
+
+  // Force refresh all data (clear cache)
+  const forceRefreshAll = async () => {
+    console.log('🔄 Force refreshing all data...')
+
+    // Clear all caches including localStorage
+    globalCache.stats = { data: null, timestamp: 0 }
+    globalCache.featuredProducts = { data: [], timestamp: 0 }
+    globalCache.products = { data: [], timestamp: 0, filters: {} }
+
+    clearCache(CACHE_KEYS.STATS)
+    clearCache(CACHE_KEYS.FEATURED_PRODUCTS)
+    clearCache(CACHE_KEYS.PRODUCTS)
+
+    // Refresh all data
+    await Promise.all([
+      refreshStats(),
+      refreshFeaturedProducts(),
+      refreshProducts() // Get all products, not just featured
+    ])
+
+    console.log('✅ All data refreshed')
+  }
+
+  // Invalidate product cache (for use after uploads)
+  const invalidateProductCache = () => {
+    console.log('🗑️ Invalidating product cache...')
+    globalCache.products = { data: [], timestamp: 0, filters: {} }
+    globalCache.featuredProducts = { data: [], timestamp: 0 }
+
+    clearCache(CACHE_KEYS.PRODUCTS)
+    clearCache(CACHE_KEYS.FEATURED_PRODUCTS)
+
+    // Trigger immediate refresh
+    refreshProducts()
+    refreshFeaturedProducts()
+  }
 
   const value: DataContextType = {
     stats,
@@ -255,7 +380,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     productsLoading,
     refreshStats,
     refreshFeaturedProducts,
-    refreshProducts
+    refreshProducts,
+    forceRefreshAll,
+    invalidateProductCache
   }
 
   return (

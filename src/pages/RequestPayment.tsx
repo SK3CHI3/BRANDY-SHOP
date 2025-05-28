@@ -170,20 +170,21 @@ export default function RequestPayment() {
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 max-w-4xl">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Button
             variant="outline"
             size="sm"
             onClick={() => navigate('/artist-studio')}
+            className="min-h-[44px] w-full sm:w-auto"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Studio
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Request Payment</h1>
-            <p className="text-gray-600 mt-1">Submit a withdrawal request for your earnings</p>
+          <div className="w-full sm:w-auto">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Request Payment</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">Submit a withdrawal request for your earnings</p>
           </div>
         </div>
 
@@ -197,9 +198,9 @@ export default function RequestPayment() {
           </Alert>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Form */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             {/* Artist Information */}
             <Card>
               <CardHeader>
@@ -262,7 +263,7 @@ export default function RequestPayment() {
               <CardContent className="space-y-6">
                 {/* Amount */}
                 <div>
-                  <Label htmlFor="amount">Withdrawal Amount (KSh) *</Label>
+                  <Label htmlFor="amount" className="text-sm sm:text-base">Withdrawal Amount (KSh) *</Label>
                   <Input
                     id="amount"
                     type="number"
@@ -271,9 +272,10 @@ export default function RequestPayment() {
                     onChange={(e) => setAmount(e.target.value)}
                     min={summary?.minimum_withdrawal}
                     max={summary?.available_balance}
-                    className="text-lg font-medium"
+                    className="text-base sm:text-lg font-medium min-h-[48px]"
+                    style={{ fontSize: '16px' }}
                   />
-                  <div className="flex justify-between text-sm text-gray-500 mt-1">
+                  <div className="flex flex-col sm:flex-row sm:justify-between text-xs sm:text-sm text-gray-500 mt-1 gap-1">
                     <span>Available: KSh {summary?.available_balance.toLocaleString()}</span>
                     <span>Min: KSh {summary?.minimum_withdrawal.toLocaleString()}</span>
                   </div>
@@ -281,22 +283,23 @@ export default function RequestPayment() {
 
                 {/* M-Pesa Phone Number */}
                 <div>
-                  <Label htmlFor="phone">M-Pesa Phone Number *</Label>
+                  <Label htmlFor="phone" className="text-sm sm:text-base">M-Pesa Phone Number *</Label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       id="phone"
                       type="tel"
                       placeholder="0700 000 000"
                       value={mpesaPhone}
                       onChange={(e) => setMpesaPhone(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 min-h-[48px] text-base"
+                      style={{ fontSize: '16px' }}
                     />
                   </div>
-                  <div className="text-sm text-gray-500 mt-1">
+                  <div className="text-xs sm:text-sm text-gray-500 mt-1">
                     Enter the phone number registered with M-Pesa
                     {mpesaPhone && (
-                      <div className="text-blue-600 font-medium mt-1">
+                      <div className="text-blue-600 font-medium mt-1 text-sm">
                         Formatted: {formatPhoneNumber(mpesaPhone)}
                       </div>
                     )}
@@ -305,26 +308,28 @@ export default function RequestPayment() {
 
                 {/* Additional Notes */}
                 <div>
-                  <Label htmlFor="notes">Additional Notes (Optional)</Label>
+                  <Label htmlFor="notes" className="text-sm sm:text-base">Additional Notes (Optional)</Label>
                   <Textarea
                     id="notes"
                     placeholder="Any additional information for the admin..."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={3}
+                    className="min-h-[120px] text-base resize-none"
+                    style={{ fontSize: '16px' }}
                   />
                 </div>
 
                 {/* Terms Agreement */}
-                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-start gap-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
                   <input
                     type="checkbox"
                     id="terms"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="mt-1"
+                    className="mt-1 min-h-[20px] min-w-[20px]"
                   />
-                  <div className="text-sm">
+                  <div className="text-xs sm:text-sm">
                     <label htmlFor="terms" className="font-medium cursor-pointer">
                       I agree to the withdrawal terms and conditions
                     </label>
@@ -341,18 +346,20 @@ export default function RequestPayment() {
                 <Button
                   onClick={handleSubmitRequest}
                   disabled={submitting || !summary || summary.available_balance < (summary.minimum_withdrawal || 1000)}
-                  className="w-full h-12 text-lg"
+                  className="w-full min-h-[48px] sm:h-12 text-base sm:text-lg"
                   size="lg"
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                      Submitting Request...
+                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-spin" />
+                      <span className="hidden sm:inline">Submitting Request...</span>
+                      <span className="sm:hidden">Submitting...</span>
                     </>
                   ) : (
                     <>
-                      <Wallet className="h-5 w-5 mr-2" />
-                      Submit Payment Request
+                      <Wallet className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                      <span className="hidden sm:inline">Submit Payment Request</span>
+                      <span className="sm:hidden">Submit Request</span>
                     </>
                   )}
                 </Button>
@@ -361,7 +368,7 @@ export default function RequestPayment() {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Balance Summary */}
             {summary && (
               <Card>

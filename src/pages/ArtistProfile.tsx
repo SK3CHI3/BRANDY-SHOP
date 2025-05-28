@@ -248,7 +248,7 @@ const ArtistProfile = () => {
       {/* Hero Section with Cover */}
       <div className="relative">
         {/* Cover Image */}
-        <div className="h-80 lg:h-96 relative overflow-hidden">
+        <div className="h-64 sm:h-80 lg:h-96 relative overflow-hidden">
           {artist.artist_profile?.[0]?.cover_image ? (
             <img
               src={artist.artist_profile[0].cover_image}
@@ -260,13 +260,13 @@ const ArtistProfile = () => {
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
 
-          {/* Floating Elements */}
-          <div className="absolute top-8 right-8 hidden lg:block">
-            <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 animate-pulse">
-              <Star className="h-6 w-6 text-white" />
+          {/* Floating Elements - Hidden on mobile */}
+          <div className="absolute top-6 right-6 sm:top-8 sm:right-8 hidden lg:block">
+            <div className="bg-white/20 backdrop-blur-sm rounded-full p-2 sm:p-3 animate-pulse">
+              <Star className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
           </div>
-          <div className="absolute bottom-12 left-8 hidden lg:block">
+          <div className="absolute bottom-8 left-6 sm:bottom-12 sm:left-8 hidden lg:block">
             <div className="bg-white/20 backdrop-blur-sm rounded-full p-2 animate-pulse delay-1000">
               <Heart className="h-4 w-4 text-white" />
             </div>
@@ -274,73 +274,79 @@ const ArtistProfile = () => {
         </div>
 
         {/* Profile Content Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6">
+            <div className="flex flex-col lg:flex-row items-start lg:items-end gap-4 sm:gap-6">
               {/* Avatar and Info */}
-              <div className="flex items-end gap-6">
+              <div className="flex items-end gap-3 sm:gap-6">
                 <div className="relative">
-                  <div className="w-24 h-24 lg:w-32 lg:h-32 bg-white rounded-2xl p-1 shadow-2xl">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-white rounded-2xl p-1 shadow-2xl">
                     <Avatar className="w-full h-full rounded-xl">
                       <AvatarImage src={artist.avatar_url} alt={artist.full_name} />
-                      <AvatarFallback className="text-2xl lg:text-3xl rounded-xl bg-gradient-to-br from-purple-400 to-pink-400 text-white">
+                      <AvatarFallback className="text-xl sm:text-2xl lg:text-3xl rounded-xl bg-gradient-to-br from-purple-400 to-pink-400 text-white">
                         {artist.full_name?.charAt(0)?.toUpperCase() || 'A'}
                       </AvatarFallback>
                     </Avatar>
                   </div>
                   {artist.artist_profile?.[0]?.verified && (
-                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                    <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
                       <span className="text-white text-xs font-bold">✓</span>
                     </div>
                   )}
                 </div>
 
                 <div className="text-white">
-                  <h1 className="text-2xl lg:text-4xl font-bold mb-2 drop-shadow-lg">
+                  <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-1 sm:mb-2 drop-shadow-lg">
                     {artist.full_name}
                   </h1>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30">
+                  <div className="flex flex-wrap items-center gap-2 mb-2 sm:mb-3">
+                    <Badge className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30 text-xs sm:text-sm">
                       {artist.artist_profile?.[0]?.specialty || 'Artist'}
                     </Badge>
                     {artist.artist_profile?.[0]?.verified && (
-                      <Badge className="bg-green-500/20 backdrop-blur-sm text-green-100 border-green-300/30">
+                      <Badge className="bg-green-500/20 backdrop-blur-sm text-green-100 border-green-300/30 text-xs sm:text-sm">
                         Verified
                       </Badge>
                     )}
                   </div>
-                  <div className="flex items-center text-white/90 text-sm lg:text-base">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    <span>{artist.location || 'Kenya'}</span>
-                    <span className="mx-3">•</span>
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span>Joined {formatDate(artist.created_at)}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center text-white/90 text-xs sm:text-sm lg:text-base gap-1 sm:gap-0">
+                    <div className="flex items-center">
+                      <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                      <span>{artist.location || 'Kenya'}</span>
+                    </div>
+                    <span className="hidden sm:inline mx-3">•</span>
+                    <div className="flex items-center">
+                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                      <span>Joined {formatDate(artist.created_at)}</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3 lg:ml-auto">
+              <div className="flex flex-wrap gap-2 sm:gap-3 lg:ml-auto w-full lg:w-auto">
                 <Button
                   variant="outline"
                   onClick={handleFollow}
-                  className={`backdrop-blur-sm border-white/30 text-white hover:bg-white/20 ${
+                  className={`backdrop-blur-sm border-white/30 text-white hover:bg-white/20 min-h-[44px] text-sm sm:text-base ${
                     isFollowing ? 'bg-white/20' : 'bg-white/10'
                   }`}
                 >
-                  <Heart className={`h-4 w-4 mr-2 ${isFollowing ? 'fill-current' : ''}`} />
-                  {isFollowing ? 'Following' : 'Follow'}
+                  <Heart className={`h-4 w-4 mr-1 sm:mr-2 ${isFollowing ? 'fill-current' : ''}`} />
+                  <span className="hidden sm:inline">{isFollowing ? 'Following' : 'Follow'}</span>
+                  <span className="sm:hidden">❤️</span>
                 </Button>
                 <Button
                   variant="outline"
-                  className="backdrop-blur-sm bg-white/10 border-white/30 text-white hover:bg-white/20"
+                  className="backdrop-blur-sm bg-white/10 border-white/30 text-white hover:bg-white/20 min-h-[44px] text-sm sm:text-base"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
+                  <Share2 className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Share</span>
+                  <span className="sm:hidden">📤</span>
                 </Button>
-                <Link to={`/messages?artist=${id}`}>
-                  <Button className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg">
-                    <MessageCircle className="h-4 w-4 mr-2" />
+                <Link to={`/messages?artist=${id}`} className="flex-1 sm:flex-none">
+                  <Button className="bg-white text-gray-900 hover:bg-gray-100 shadow-lg w-full min-h-[44px] text-sm sm:text-base">
+                    <MessageCircle className="h-4 w-4 mr-1 sm:mr-2" />
                     Message
                   </Button>
                 </Link>
@@ -352,65 +358,88 @@ const ArtistProfile = () => {
 
       {/* Stats Bar */}
       <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             <div className="text-center">
-              <div className="text-2xl lg:text-3xl font-bold text-gray-900">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
                 {portfolio.length}
               </div>
-              <div className="text-sm text-gray-600">Designs</div>
+              <div className="text-xs sm:text-sm text-gray-600">Designs</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl lg:text-3xl font-bold text-gray-900">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
                 {followersCount.toLocaleString()}
               </div>
-              <div className="text-sm text-gray-600">Followers</div>
+              <div className="text-xs sm:text-sm text-gray-600">Followers</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl lg:text-3xl font-bold text-gray-900">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
                 {averageRating > 0 ? averageRating.toFixed(1) : 'New'}
               </div>
-              <div className="text-sm text-gray-600">Rating</div>
+              <div className="text-xs sm:text-sm text-gray-600">Rating</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl lg:text-3xl font-bold text-gray-900">
+              <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
                 {reviews.length}
               </div>
-              <div className="text-sm text-gray-600">Reviews</div>
+              <div className="text-xs sm:text-sm text-gray-600">Reviews</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        {/* Mobile Commission Card - Show at top on mobile */}
+        <div className="lg:hidden mb-6">
+          <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-2xl p-6 text-white shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12"></div>
+            <div className="absolute bottom-0 left-0 w-16 h-16 bg-white/5 rounded-full translate-y-8 -translate-x-8"></div>
+
+            <div className="relative z-10">
+              <div className="flex items-center mb-3">
+                <Palette className="h-5 w-5 mr-2" />
+                <h3 className="text-lg font-bold">Commission a Design</h3>
+              </div>
+              <p className="text-white/90 mb-4 text-sm leading-relaxed">
+                Get a custom design made just for you by {artist.full_name}. Bring your vision to life!
+              </p>
+              <Link to={`/commission/${id}`}>
+                <Button className="w-full bg-white text-purple-700 hover:bg-gray-100 font-semibold shadow-lg min-h-[48px]">
+                  Start Project
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
             <Tabs defaultValue="portfolio" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-white shadow-sm border border-gray-200 rounded-xl p-1">
+              <TabsList className="grid w-full grid-cols-3 bg-white shadow-sm border border-gray-200 rounded-xl p-1 h-12 sm:h-auto">
                 <TabsTrigger
                   value="portfolio"
-                  className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+                  className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white text-sm sm:text-base min-h-[44px]"
                 >
                   Portfolio
                 </TabsTrigger>
                 <TabsTrigger
                   value="about"
-                  className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+                  className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white text-sm sm:text-base min-h-[44px]"
                 >
                   About
                 </TabsTrigger>
                 <TabsTrigger
                   value="reviews"
-                  className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+                  className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white text-sm sm:text-base min-h-[44px]"
                 >
                   Reviews
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="portfolio" className="mt-8">
+              <TabsContent value="portfolio" className="mt-6 sm:mt-8">
                 {portfolio.length > 0 ? (
-                  <div className="grid md:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                     {portfolio.map((item) => (
                       <Link
                         key={item.id}
@@ -426,16 +455,16 @@ const ArtistProfile = () => {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                           {/* Floating Action */}
-                          <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg min-h-[44px] min-w-[44px] flex items-center justify-center">
                               <Heart className="h-4 w-4 text-gray-700" />
                             </div>
                           </div>
                         </div>
 
-                        <div className="p-6">
+                        <div className="p-4 sm:p-6">
                           <div className="flex items-center justify-between mb-3">
-                            <Badge className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border-purple-200">
+                            <Badge className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 border-purple-200 text-xs sm:text-sm">
                               {item.category?.name || 'Design'}
                             </Badge>
                             <div className="flex items-center text-gray-500 text-sm">
@@ -444,12 +473,12 @@ const ArtistProfile = () => {
                             </div>
                           </div>
 
-                          <h3 className="font-bold text-gray-900 mb-2 line-clamp-1 group-hover:text-purple-600 transition-colors">
+                          <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors text-base sm:text-lg">
                             {item.title}
                           </h3>
 
                           <div className="flex items-center justify-between">
-                            <p className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                            <p className="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                               KSh {item.price?.toLocaleString() || '0'}
                             </p>
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -473,48 +502,48 @@ const ArtistProfile = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="about" className="mt-8">
-                <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                  <div className="mb-8">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">About {artist.full_name}</h3>
+              <TabsContent value="about" className="mt-6 sm:mt-8">
+                <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-100">
+                  <div className="mb-6 sm:mb-8">
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">About {artist.full_name}</h3>
                     <div className="prose prose-gray max-w-none">
-                      <p className="text-gray-600 leading-relaxed text-lg">
+                      <p className="text-gray-600 leading-relaxed text-base sm:text-lg">
                         {artist.artist_profile?.[0]?.bio || artist.bio ||
                          `${artist.full_name} is a talented artist creating amazing designs on Brandy Shop. Their unique style and creative vision bring fresh perspectives to every project.`}
                       </p>
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-8 mb-8">
-                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border border-purple-100">
-                      <h4 className="font-bold text-gray-900 mb-4 flex items-center">
-                        <Star className="h-5 w-5 mr-2 text-purple-600" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 sm:p-6 border border-purple-100">
+                      <h4 className="font-bold text-gray-900 mb-3 sm:mb-4 flex items-center text-base sm:text-lg">
+                        <Star className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-purple-600" />
                         Skills & Expertise
                       </h4>
                       <div className="flex flex-wrap gap-2">
                         {artist.artist_profile?.[0]?.skills ?
                           artist.artist_profile[0].skills.map((skill: string) => (
-                            <Badge key={skill} className="bg-white/80 text-purple-700 border-purple-200 hover:bg-white">
+                            <Badge key={skill} className="bg-white/80 text-purple-700 border-purple-200 hover:bg-white text-xs sm:text-sm">
                               {skill}
                             </Badge>
                           )) : (
-                            <Badge className="bg-white/80 text-purple-700 border-purple-200">Design</Badge>
+                            <Badge className="bg-white/80 text-purple-700 border-purple-200 text-xs sm:text-sm">Design</Badge>
                           )
                         }
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
-                      <h4 className="font-bold text-gray-900 mb-4 flex items-center">
-                        <Palette className="h-5 w-5 mr-2 text-blue-600" />
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 sm:p-6 border border-blue-100">
+                      <h4 className="font-bold text-gray-900 mb-3 sm:mb-4 flex items-center text-base sm:text-lg">
+                        <Palette className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-blue-600" />
                         Specialties
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        <Badge className="bg-white/80 text-blue-700 border-blue-200 hover:bg-white">
+                        <Badge className="bg-white/80 text-blue-700 border-blue-200 hover:bg-white text-xs sm:text-sm">
                           {artist.artist_profile?.[0]?.specialty || 'Custom Design'}
                         </Badge>
                         {portfolio.length > 0 && (
-                          <Badge className="bg-white/80 text-blue-700 border-blue-200 hover:bg-white">
+                          <Badge className="bg-white/80 text-blue-700 border-blue-200 hover:bg-white text-xs sm:text-sm">
                             {portfolio.length} Design{portfolio.length !== 1 ? 's' : ''}
                           </Badge>
                         )}
@@ -523,21 +552,21 @@ const ArtistProfile = () => {
                   </div>
 
                   {/* Additional Info Cards */}
-                  <div className="grid md:grid-cols-3 gap-6">
-                    <div className="text-center p-6 bg-gray-50 rounded-xl border border-gray-200">
-                      <Calendar className="h-8 w-8 text-gray-600 mx-auto mb-3" />
-                      <div className="font-semibold text-gray-900">Member Since</div>
-                      <div className="text-gray-600 text-sm mt-1">{formatDate(artist.created_at)}</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                    <div className="text-center p-4 sm:p-6 bg-gray-50 rounded-xl border border-gray-200">
+                      <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-gray-600 mx-auto mb-2 sm:mb-3" />
+                      <div className="font-semibold text-gray-900 text-sm sm:text-base">Member Since</div>
+                      <div className="text-gray-600 text-xs sm:text-sm mt-1">{formatDate(artist.created_at)}</div>
                     </div>
-                    <div className="text-center p-6 bg-gray-50 rounded-xl border border-gray-200">
-                      <MapPin className="h-8 w-8 text-gray-600 mx-auto mb-3" />
-                      <div className="font-semibold text-gray-900">Location</div>
-                      <div className="text-gray-600 text-sm mt-1">{artist.location || 'Kenya'}</div>
+                    <div className="text-center p-4 sm:p-6 bg-gray-50 rounded-xl border border-gray-200">
+                      <MapPin className="h-6 w-6 sm:h-8 sm:w-8 text-gray-600 mx-auto mb-2 sm:mb-3" />
+                      <div className="font-semibold text-gray-900 text-sm sm:text-base">Location</div>
+                      <div className="text-gray-600 text-xs sm:text-sm mt-1">{artist.location || 'Kenya'}</div>
                     </div>
-                    <div className="text-center p-6 bg-gray-50 rounded-xl border border-gray-200">
-                      <MessageCircle className="h-8 w-8 text-gray-600 mx-auto mb-3" />
-                      <div className="font-semibold text-gray-900">Response Time</div>
-                      <div className="text-gray-600 text-sm mt-1">
+                    <div className="text-center p-4 sm:p-6 bg-gray-50 rounded-xl border border-gray-200">
+                      <MessageCircle className="h-6 w-6 sm:h-8 sm:w-8 text-gray-600 mx-auto mb-2 sm:mb-3" />
+                      <div className="font-semibold text-gray-900 text-sm sm:text-base">Response Time</div>
+                      <div className="text-gray-600 text-xs sm:text-sm mt-1">
                         {artist.artist_profile?.[0]?.response_time || 'Within 24 hours'}
                       </div>
                     </div>
@@ -607,23 +636,23 @@ const ArtistProfile = () => {
             </Tabs>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-8">
+          {/* Sidebar - Hidden on mobile */}
+          <div className="hidden lg:block space-y-6 lg:space-y-8">
             {/* Commission Card - Featured */}
-            <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-2xl p-8 text-white shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+            <div className="bg-gradient-to-br from-purple-600 via-purple-700 to-pink-600 rounded-2xl p-6 lg:p-8 text-white shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 lg:w-32 lg:h-32 bg-white/10 rounded-full -translate-y-12 lg:-translate-y-16 translate-x-12 lg:translate-x-16"></div>
+              <div className="absolute bottom-0 left-0 w-16 h-16 lg:w-24 lg:h-24 bg-white/5 rounded-full translate-y-8 lg:translate-y-12 -translate-x-8 lg:-translate-x-12"></div>
 
               <div className="relative z-10">
-                <div className="flex items-center mb-4">
-                  <Palette className="h-6 w-6 mr-2" />
-                  <h3 className="text-xl font-bold">Commission a Design</h3>
+                <div className="flex items-center mb-3 lg:mb-4">
+                  <Palette className="h-5 w-5 lg:h-6 lg:w-6 mr-2" />
+                  <h3 className="text-lg lg:text-xl font-bold">Commission a Design</h3>
                 </div>
-                <p className="text-white/90 mb-6 leading-relaxed">
+                <p className="text-white/90 mb-4 lg:mb-6 leading-relaxed text-sm lg:text-base">
                   Get a custom design made just for you by {artist.full_name}. Bring your vision to life!
                 </p>
                 <Link to={`/commission/${id}`}>
-                  <Button className="w-full bg-white text-purple-700 hover:bg-gray-100 font-semibold shadow-lg">
+                  <Button className="w-full bg-white text-purple-700 hover:bg-gray-100 font-semibold shadow-lg min-h-[48px]">
                     Start Project
                   </Button>
                 </Link>
@@ -631,18 +660,18 @@ const ArtistProfile = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="space-y-3">
+            <div className="bg-white rounded-2xl shadow-lg p-4 lg:p-6 border border-gray-100">
+              <h3 className="text-base lg:text-lg font-bold text-gray-900 mb-3 lg:mb-4">Quick Actions</h3>
+              <div className="space-y-2 lg:space-y-3">
                 <Link to={`/messages?artist=${id}`}>
-                  <Button variant="outline" className="w-full justify-start hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700">
+                  <Button variant="outline" className="w-full justify-start hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 min-h-[44px] text-sm lg:text-base">
                     <MessageCircle className="h-4 w-4 mr-3" />
                     Send Message
                   </Button>
                 </Link>
                 <Button
                   variant="outline"
-                  className={`w-full justify-start transition-all duration-200 ${
+                  className={`w-full justify-start transition-all duration-200 min-h-[44px] text-sm lg:text-base ${
                     isFollowing
                       ? 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100'
                       : 'hover:bg-purple-50 hover:border-purple-200 hover:text-purple-700'
@@ -652,7 +681,7 @@ const ArtistProfile = () => {
                   <Heart className={`h-4 w-4 mr-3 ${isFollowing ? 'fill-current' : ''}`} />
                   {isFollowing ? 'Following' : 'Follow Artist'}
                 </Button>
-                <Button variant="outline" className="w-full justify-start hover:bg-gray-50">
+                <Button variant="outline" className="w-full justify-start hover:bg-gray-50 min-h-[44px] text-sm lg:text-base">
                   <Share2 className="h-4 w-4 mr-3" />
                   Share Profile
                 </Button>

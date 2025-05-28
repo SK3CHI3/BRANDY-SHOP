@@ -1,0 +1,274 @@
+/* Mobile-First Responsive Design Utilities for Brandy Shop */
+
+/* Touch-friendly button sizes */
+.btn-touch {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 12px 16px;
+}
+
+.btn-touch-sm {
+  min-height: 40px;
+  min-width: 40px;
+  padding: 10px 14px;
+}
+
+/* Mobile-optimized text sizes */
+.text-mobile-xs { font-size: 0.75rem; line-height: 1rem; }
+.text-mobile-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.text-mobile-base { font-size: 1rem; line-height: 1.5rem; }
+.text-mobile-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.text-mobile-xl { font-size: 1.25rem; line-height: 1.75rem; }
+
+/* Mobile-friendly spacing */
+.mobile-padding { padding: 1rem; }
+.mobile-padding-sm { padding: 0.75rem; }
+.mobile-margin { margin: 1rem; }
+.mobile-margin-sm { margin: 0.75rem; }
+
+/* Mobile-optimized grid layouts */
+.mobile-grid-1 { 
+  display: grid; 
+  grid-template-columns: 1fr; 
+  gap: 1rem; 
+}
+
+.mobile-grid-2 { 
+  display: grid; 
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 0.75rem; 
+}
+
+/* Mobile navigation improvements */
+.mobile-nav-item {
+  padding: 12px 16px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.mobile-nav-item:hover {
+  background-color: rgba(249, 115, 22, 0.1);
+}
+
+/* Mobile form improvements */
+.mobile-input {
+  min-height: 48px;
+  padding: 12px 16px;
+  font-size: 16px; /* Prevents zoom on iOS */
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}
+
+.mobile-input:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+/* Mobile card improvements */
+.mobile-card {
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.mobile-card-compact {
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  background: white;
+}
+
+/* Mobile-optimized hero section */
+.mobile-hero {
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.mobile-hero h1 {
+  font-size: 2rem;
+  line-height: 2.25rem;
+  margin-bottom: 1rem;
+}
+
+.mobile-hero p {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Mobile product grid */
+.mobile-product-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .mobile-product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Mobile dashboard improvements */
+.mobile-dashboard-header {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.mobile-dashboard-header h1 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.mobile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  padding: 0 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Mobile messaging improvements */
+.mobile-message-bubble {
+  max-width: 85%;
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  margin-bottom: 0.5rem;
+  word-wrap: break-word;
+}
+
+.mobile-message-input {
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  border-radius: 1.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 16px;
+}
+
+/* Mobile custom studio improvements */
+.mobile-studio-step {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.mobile-studio-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+/* Mobile marketplace improvements */
+.mobile-marketplace-filters {
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.mobile-product-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobile-product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* Mobile-specific utilities */
+.mobile-only {
+  display: block;
+}
+
+.desktop-only {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .mobile-only {
+    display: none;
+  }
+  
+  .desktop-only {
+    display: block;
+  }
+}
+
+/* Mobile scroll improvements */
+.mobile-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobile-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile-friendly animations */
+.mobile-fade-in {
+  animation: mobileSlideUp 0.3s ease-out;
+}
+
+@keyframes mobileSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile accessibility improvements */
+.mobile-focus:focus {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+
+/* Mobile-optimized loading states */
+.mobile-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: mobileShimmer 1.5s infinite;
+}
+
+@keyframes mobileShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Mobile-specific breakpoint utilities */
+@media (max-width: 480px) {
+  .mobile-xs-hidden { display: none; }
+  .mobile-xs-text-sm { font-size: 0.875rem; }
+  .mobile-xs-p-2 { padding: 0.5rem; }
+  .mobile-xs-gap-2 { gap: 0.5rem; }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .mobile-md-grid-2 { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+  }
+}

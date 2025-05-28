@@ -1,0 +1,366 @@
+/* Modern Mobile Menu Design with Scroll Containment */
+
+.mobileMenuPanel {
+  /* Scroll containment and performance */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  isolation: isolate;
+
+  /* Modern design */
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 0 0 24px 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Custom scrollbar styling */
+.mobileMenuPanel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mobileMenuPanel::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.mobileMenuPanel::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.mobileMenuPanel::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #ea580c, #dc2626);
+}
+
+/* Enhanced backdrop with blur effect */
+.backdrop {
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* Smooth slide-down animation */
+.mobileMenuPanel {
+  animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(4px);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+    filter: blur(4px);
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+/* Focus management for accessibility */
+.mobileMenuPanel:focus-within {
+  outline: none;
+}
+
+/* Prevent text selection on backdrop */
+.backdrop {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Ensure proper touch targets on mobile */
+@media (max-width: 768px) {
+  .mobileMenuPanel .menuLink {
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+  
+  .mobileMenuPanel .menuButton {
+    min-height: 48px;
+    min-width: 48px;
+    touch-action: manipulation;
+  }
+}
+
+/* Responsive adjustments for different screen sizes */
+@media (max-width: 320px) {
+  .mobileMenuPanel {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+@media (min-width: 321px) and (max-width: 375px) {
+  .mobileMenuPanel {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (min-width: 376px) and (max-width: 768px) {
+  .mobileMenuPanel {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+/* Prevent horizontal scrolling within menu */
+.mobileMenuContent {
+  max-width: 100%;
+  overflow-x: hidden;
+  word-wrap: break-word;
+  padding: 20px 24px;
+}
+
+/* Beautiful search section */
+.searchSection {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.08), rgba(234, 88, 12, 0.08));
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.searchSection:focus-within {
+  border-color: rgba(249, 115, 22, 0.4);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+  transform: scale(1.02);
+}
+
+.searchInput {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  font-size: 16px !important;
+  color: #374151 !important;
+  font-weight: 500;
+}
+
+.searchInput::placeholder {
+  color: #9ca3af !important;
+  font-weight: 400;
+}
+
+/* User profile section styling */
+.userProfileSection {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(79, 70, 229, 0.08));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 16px 0;
+  backdrop-filter: blur(10px);
+}
+
+.userAvatar {
+  border: 3px solid rgba(249, 115, 22, 0.3);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
+}
+
+.userName {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 16px;
+}
+
+.userRole {
+  color: #6b7280;
+  font-size: 14px;
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+/* Beautiful menu item styling */
+.menuItem {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 8px;
+}
+
+.menuItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(234, 88, 12, 0.1));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.menuItem:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.2), 0 8px 10px -6px rgba(249, 115, 22, 0.1);
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+.menuItem:hover::before {
+  opacity: 1;
+}
+
+.menuItem:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 0.1s;
+}
+
+/* Active menu item styling */
+.menuItemActive {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(234, 88, 12, 0.15));
+  border-color: rgba(249, 115, 22, 0.4);
+  color: #ea580c;
+  font-weight: 600;
+}
+
+.menuItemActive::before {
+  opacity: 1;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(234, 88, 12, 0.1));
+}
+
+/* Loading state for menu */
+.menuLoading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Safe area adjustments for devices with notches */
+@supports (padding: max(0px)) {
+  .mobileMenuPanel {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .backdrop {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+  
+  .mobileMenuPanel {
+    border: 2px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .mobileMenuPanel,
+  .menuItem {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Beautiful button styling */
+.menuButton {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.menuButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.4);
+  background: linear-gradient(135deg, #ea580c, #dc2626);
+}
+
+.menuButton:active {
+  transform: translateY(0);
+  transition-duration: 0.1s;
+}
+
+.menuButtonOutline {
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(249, 115, 22, 0.3);
+  border-radius: 16px;
+  color: #ea580c;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.menuButtonOutline:hover {
+  background: rgba(249, 115, 22, 0.1);
+  border-color: rgba(249, 115, 22, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(249, 115, 22, 0.2);
+}
+
+/* Section dividers */
+.sectionDivider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(249, 115, 22, 0.3), transparent);
+  margin: 20px 0;
+  border: none;
+}
+
+/* Sign out button special styling */
+.signOutButton {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #dc2626;
+  border-radius: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.signOutButton:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.15));
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.2);
+}
+
+/* Dark mode support (if implemented) */
+@media (prefers-color-scheme: dark) {
+  .mobileMenuPanel {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+    color: #f9fafb;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .backdrop {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+
+  .menuItem {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f9fafb;
+  }
+
+  .searchSection {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(234, 88, 12, 0.1));
+    border-color: rgba(249, 115, 22, 0.3);
+  }
+}

@@ -9,8 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search, Filter, Grid, List, User, Heart, ShoppingCart, Send, Sparkles, Palette } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
+import RefreshButton from '@/components/RefreshButton';
+import styles from './Marketplace.module.css';
 
 const Marketplace = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -18,6 +21,7 @@ const Marketplace = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const { user } = useAuth();
+  const { addToCart } = useCart();
   const { categories } = useCategories();
   const { products, loading: productsLoading } = useProducts({
     category: selectedCategory !== 'all' ? selectedCategory : undefined
@@ -62,7 +66,7 @@ const Marketplace = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search and Filters */}
-        <div className="flex flex-col lg:flex-row gap-6 mb-8">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 mb-6 sm:mb-8">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -70,16 +74,18 @@ const Marketplace = () => {
                 placeholder="Search designs, artists..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 min-h-[48px] text-base"
+                style={{ fontSize: '16px' }}
               />
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 border rounded-lg"
+              className="px-4 py-3 border rounded-lg min-h-[48px] text-base"
+              style={{ fontSize: '16px' }}
             >
               <option value="all">All Categories</option>
               {categories.map(category => (
@@ -89,16 +95,20 @@ const Marketplace = () => {
               ))}
             </select>
 
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="min-h-[48px] text-sm sm:text-base">
               <Filter className="h-4 w-4 mr-2" />
-              Filters
+              <span className="hidden sm:inline">Filters</span>
+              <span className="sm:hidden">Filter</span>
             </Button>
+
+            <RefreshButton size="sm" variant="outline" showText={false} className="min-h-[48px]" />
 
             <div className="flex border rounded-lg">
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
+                className="min-h-[44px] min-w-[44px]"
               >
                 <Grid className="h-4 w-4" />
               </Button>
@@ -106,6 +116,7 @@ const Marketplace = () => {
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('list')}
+                className="min-h-[44px] min-w-[44px]"
               >
                 <List className="h-4 w-4" />
               </Button>
@@ -120,7 +131,7 @@ const Marketplace = () => {
             <p className="text-gray-600">Loading products...</p>
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className={`grid gap-6 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+          <div className={`grid gap-4 sm:gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
             {productsToDisplay.map((product) => (
               product.isCustomCard ? (
                 // Custom Request Card
@@ -135,31 +146,31 @@ const Marketplace = () => {
                     ✨ Custom
                   </Badge>
 
-                  <div className="relative z-10 p-6 h-full flex flex-col">
+                  <div className="relative z-10 p-4 sm:p-6 h-full flex flex-col">
                     {/* Icon Section */}
-                    <div className="aspect-square bg-white/20 rounded-lg mb-4 flex items-center justify-center">
+                    <div className="aspect-square bg-white/20 rounded-lg mb-3 sm:mb-4 flex items-center justify-center">
                       <div className="text-center">
-                        <Palette className="h-12 w-12 text-white mx-auto mb-2" />
-                        <Sparkles className="h-6 w-6 text-yellow-300 mx-auto" />
+                        <Palette className="h-8 w-8 sm:h-12 sm:w-12 text-white mx-auto mb-1 sm:mb-2" />
+                        <Sparkles className="h-4 w-4 sm:h-6 sm:w-6 text-yellow-300 mx-auto" />
                       </div>
                     </div>
 
                     <div className="flex-1 flex flex-col justify-between">
                       <div>
-                        <h3 className="text-lg font-bold text-white mb-2">
+                        <h3 className="text-base sm:text-lg font-bold text-white mb-2">
                           Need Something Custom?
                         </h3>
-                        <p className="text-white/90 text-sm mb-3 leading-relaxed">
+                        <p className="text-white/90 text-xs sm:text-sm mb-3 leading-relaxed">
                           Can't find what you're looking for? Let our team create something unique just for you!
                         </p>
 
                         {/* Trust Indicators */}
-                        <div className="flex items-center text-white/80 text-xs mb-4">
-                          <div className="flex items-center mr-3">
+                        <div className="flex flex-wrap items-center text-white/80 text-xs mb-4 gap-2">
+                          <div className="flex items-center">
                             <div className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
                             Free Quote
                           </div>
-                          <div className="flex items-center mr-3">
+                          <div className="flex items-center">
                             <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full mr-1"></div>
                             Fast Response
                           </div>
@@ -174,7 +185,13 @@ const Marketplace = () => {
                       <Link to="/custom-studio" className="block">
                         <Button
                           size="sm"
-                          className="w-full bg-white text-purple-700 hover:bg-gray-100 font-semibold shadow-lg transform hover:scale-105 transition-all duration-200"
+                          className={`${styles.customButton} ${styles.touchButton}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          onTouchStart={(e) => {
+                            e.stopPropagation();
+                          }}
                         >
                           <Send className="h-4 w-4 mr-2" />
                           Get Custom Design
@@ -184,8 +201,8 @@ const Marketplace = () => {
                   </div>
                 </div>
               ) : (
-              <Link key={product.id} to={`/product/${product.id}`} className="block">
-                <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow relative">
+              <Link key={product.id} to={`/product/${product.id}`} className={`block ${styles.productLink}`}>
+                <div className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow relative ${styles.productCard}`}>
                   {product.is_featured && (
                     <Badge className="absolute top-3 left-3 z-10 bg-yellow-500">
                       Featured
@@ -199,9 +216,10 @@ const Marketplace = () => {
                       className="w-full h-full object-cover"
                     />
                     <button
-                      className="absolute top-3 right-3 p-2 bg-white/80 rounded-full hover:bg-white"
+                      className={`${styles.heartButton} ${styles.touchButton}`}
                       onClick={async (e) => {
                         e.preventDefault();
+                        e.stopPropagation();
                         if (!user) {
                           toast({
                             title: 'Sign in required',
@@ -251,48 +269,53 @@ const Marketplace = () => {
                           });
                         }
                       }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                      }}
                     >
                       <Heart className="h-4 w-4 text-gray-600" />
                     </button>
                   </div>
 
-                  <div className="p-4">
+                  <div className="p-3 sm:p-4">
                     <div className="flex items-center justify-between mb-2">
                       <Badge variant="secondary" className="text-xs">
                         {product.category?.name || 'Uncategorized'}
                       </Badge>
-                      <div className="flex items-center text-sm text-gray-600">
+                      <div className="flex items-center text-xs sm:text-sm text-gray-600">
                         <span className="text-yellow-500">★</span>
                         <span className="ml-1">4.5</span>
                         <span className="ml-1">(0)</span>
                       </div>
                     </div>
 
-                    <h3 className="font-semibold text-gray-900 mb-1">{product.title}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base line-clamp-2">{product.title}</h3>
 
-                    <div className="flex items-center text-sm text-gray-600 mb-3">
-                      <User className="h-4 w-4 mr-1" />
-                      <span>by {product.artist?.full_name || 'Unknown Artist'}</span>
+                    <div className="flex items-center text-xs sm:text-sm text-gray-600 mb-3">
+                      <User className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                      <span className="truncate">by {product.artist?.full_name || 'Unknown Artist'}</span>
                     </div>
 
                     <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-purple-600">KSh {product.price.toLocaleString()}</span>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                        <span className="text-base sm:text-lg font-bold text-purple-600">KSh {product.price.toLocaleString()}</span>
                         {product.original_price && product.original_price > product.price && (
-                          <span className="text-sm text-gray-500 line-through">KSh {product.original_price.toLocaleString()}</span>
+                          <span className="text-xs sm:text-sm text-gray-500 line-through">KSh {product.original_price.toLocaleString()}</span>
                         )}
                       </div>
-                      <span className={`text-sm ${product.stock_quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <span className={`text-xs sm:text-sm ${product.stock_quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
                       </span>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className={`${styles.actionButtons} ${styles.buttonContainer}`}>
                       <Button
-                        className="flex-1"
+                        className={`flex-1 ${styles.primaryButton} ${styles.touchButton}`}
+                        size="sm"
                         disabled={product.stock_quantity === 0}
                         onClick={async (e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           if (!user) {
                             toast({
                               title: 'Sign in required',
@@ -303,28 +326,7 @@ const Marketplace = () => {
                           }
 
                           try {
-                            const { data: existingItem } = await supabase
-                              .from('cart_items')
-                              .select('id, quantity')
-                              .eq('user_id', user.id)
-                              .eq('product_id', product.id)
-                              .single();
-
-                            if (existingItem) {
-                              await supabase
-                                .from('cart_items')
-                                .update({ quantity: existingItem.quantity + 1 })
-                                .eq('id', existingItem.id);
-                            } else {
-                              await supabase
-                                .from('cart_items')
-                                .insert({
-                                  user_id: user.id,
-                                  product_id: product.id,
-                                  quantity: 1
-                                });
-                            }
-
+                            await addToCart(product.id, 1);
                             toast({
                               title: 'Added to cart',
                               description: `${product.title} added to your cart`,
@@ -337,19 +339,33 @@ const Marketplace = () => {
                             });
                           }
                         }}
+                        onTouchStart={(e) => {
+                          e.stopPropagation();
+                        }}
+                        onTouchEnd={(e) => {
+                          e.stopPropagation();
+                        }}
                       >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Add to Cart
+                        <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                        <span className="text-xs sm:text-sm">Add to Cart</span>
                       </Button>
                       <Button
                         variant="outline"
-                        className="flex-1"
+                        className={`flex-1 ${styles.secondaryButton} ${styles.touchButton}`}
+                        size="sm"
                         onClick={(e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           window.location.href = `/custom-studio?product=${product.id}`;
                         }}
+                        onTouchStart={(e) => {
+                          e.stopPropagation();
+                        }}
+                        onTouchEnd={(e) => {
+                          e.stopPropagation();
+                        }}
                       >
-                        Customize
+                        <span className="text-xs sm:text-sm">Customize</span>
                       </Button>
                     </div>
                   </div>

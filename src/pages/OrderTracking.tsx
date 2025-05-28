@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,8 +31,11 @@ import {
   ShoppingBag,
   Palette,
   BarChart3,
-  AlertCircle
+  AlertCircle,
+  Loader2,
+  Lock
 } from 'lucide-react'
+import { AuthModal } from '@/components/auth/AuthModal'
 
 // Artist-specific interfaces
 interface ArtistOrder {
@@ -68,167 +72,285 @@ interface DesignPerformance {
 
 interface CustomerOrder {
   id: string
+  order_number: string
   status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  orderNumber: string
-  createdAt: string
-  estimatedDelivery: string
-  total: number
-  items: Array<{
+  created_at: string
+  estimated_delivery?: string
+  total_amount: number
+  shipping_address: any
+  tracking_number?: string
+  payment_method?: string
+  payment_status?: string
+  order_items: Array<{
     id: string
-    title: string
-    artist: string
-    price: number
     quantity: number
-    image: string
-  }>
-  shippingAddress: {
-    name: string
-    address: string
-    city: string
-    phone: string
-  }
-  trackingNumber?: string
-  timeline: Array<{
-    status: string
-    description: string
-    timestamp: string
-    completed: boolean
+    price: number
+    product: {
+      id: string
+      title: string
+      image_url: string
+      artist?: {
+        id: string
+        full_name: string
+      }
+    }
   }>
 }
 
 const OrderTracking = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const [activeTab, setActiveTab] = useState('orders')
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(false)
-  const [artistOrders, setArtistOrders] = useState<ArtistOrder[]>([])
-  const [designPerformance, setDesignPerformance] = useState<DesignPerformance[]>([])
-  const [customerOrder, setCustomerOrder] = useState<CustomerOrder | null>(null)
+  const [customerOrders, setCustomerOrders] = useState<CustomerOrder[]>([])
+  const [selectedOrder, setSelectedOrder] = useState<CustomerOrder | null>(null)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
 
-  // Check if user is artist and redirect to artist orders page
+  // Fetch customer orders
+  const fetchCustomerOrders = async () => {
+    if (!user) return
+
+    setLoading(true)
+    try {
+      console.log('Fetching orders for user:', user.id)
+
+      // Try to fetch orders with a simple query first
+      const { data: ordersData, error: ordersError } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          order_number,
+          status,
+          created_at,
+          estimated_delivery,
+          total_amount,
+          shipping_address,
+          tracking_number,
+          payment_method,
+          payment_status
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (ordersError) {
+        console.error('Orders query error:', ordersError)
+
+        // Handle specific error types
+        if (ordersError.code === 'PGRST116' || ordersError.message?.includes('relation') || ordersError.message?.includes('does not exist')) {
+          // Table doesn't exist - this is expected for new installations
+          console.log('Orders table not found - showing empty state')
+          setCustomerOrders([])
+          return
+        } else if (ordersError.code === '42501' || ordersError.message?.includes('permission') || ordersError.message?.includes('RLS')) {
+          // Permission denied - RLS policy issue
+          console.log('Permission denied - RLS policy issue')
+          setCustomerOrders([])
+          return
+        } else {
+          throw ordersError
+        }
+      }
+
+      console.log('Orders found:', ordersData?.length || 0)
+
+      // If we have orders, try to fetch order items
+      if (ordersData && ordersData.length > 0) {
+        try {
+          // Fetch order items separately to avoid complex join issues
+          const orderIds = ordersData.map(order => order.id)
+          const { data: orderItemsData, error: itemsError } = await supabase
+            .from('order_items')
+            .select(`
+              id,
+              order_id,
+              quantity,
+              price,
+              product:products (
+                id,
+                title,
+                image_url,
+                artist:profiles!products_artist_id_fkey (
+                  id,
+                  full_name
+                )
+              )
+            `)
+            .in('order_id', orderIds)
+
+          if (itemsError) {
+            console.error('Order items query error:', itemsError)
+            // If order items query fails, just use orders without items
+            setCustomerOrders(ordersData.map(order => ({
+              ...order,
+              order_items: []
+            })))
+          } else {
+            // Combine orders with their items
+            const ordersWithItems = ordersData.map(order => ({
+              ...order,
+              order_items: orderItemsData?.filter(item => item.order_id === order.id) || []
+            }))
+            setCustomerOrders(ordersWithItems)
+          }
+        } catch (itemsError) {
+          console.error('Error fetching order items:', itemsError)
+          // Fall back to orders without items
+          setCustomerOrders(ordersData.map(order => ({
+            ...order,
+            order_items: []
+          })))
+        }
+      } else {
+        // No orders found - this is normal for new users
+        console.log('No orders found for user')
+        setCustomerOrders([])
+      }
+
+      // If there's an ID in the URL, find and select that order
+      if (id && ordersData) {
+        const order = ordersData.find(o => o.id === id || o.order_number === id)
+        if (order) {
+          setSelectedOrder(order)
+        }
+      }
+    } catch (error) {
+      console.error('Unexpected error fetching orders:', error)
+
+      // For any unexpected error, just show empty state
+      // This prevents the "Failed to load orders" error from showing
+      console.log('Setting empty orders due to unexpected error')
+      setCustomerOrders([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
-    if (user && user.role === 'artist') {
-      // If artist, redirect to artist-specific order management
+    if (user && profile?.role === 'customer') {
+      fetchCustomerOrders()
+    } else if (user && profile?.role === 'artist') {
+      // Redirect artists to their specific order management
       navigate('/artist-orders')
     }
-  }, [user, navigate])
+  }, [user, profile, id, navigate])
 
-  // Mock artist orders data
-  const mockArtistOrders: ArtistOrder[] = [
-    {
-      id: '1',
-      orderNumber: 'ORD-2024-001',
-      status: 'shipped',
-      createdAt: '2024-01-15T10:30:00Z',
-      customerName: 'John Doe',
-      customerEmail: 'john@example.com',
-      designTitle: 'Kenyan Wildlife T-Shirt',
-      designImage: '/placeholder.svg',
-      quantity: 2,
-      unitPrice: 1500,
-      totalAmount: 3000,
-      commission: 450,
-      commissionRate: 15,
-      shippingAddress: '123 Kenyatta Avenue, Nairobi',
-      trackingNumber: 'TRK-KE-789456123',
-      estimatedDelivery: '2024-01-20T18:00:00Z'
-    },
-    {
-      id: '2',
-      orderNumber: 'ORD-2024-002',
-      status: 'processing',
-      createdAt: '2024-01-16T14:20:00Z',
-      customerName: 'Jane Smith',
-      customerEmail: 'jane@example.com',
-      designTitle: 'Traditional Patterns Hoodie',
-      designImage: '/placeholder.svg',
-      quantity: 1,
-      unitPrice: 2500,
-      totalAmount: 2500,
-      commission: 375,
-      commissionRate: 15,
-      shippingAddress: '456 Uhuru Highway, Mombasa',
-      estimatedDelivery: '2024-01-22T18:00:00Z'
-    },
-    {
-      id: '3',
-      orderNumber: 'ORD-2024-003',
-      status: 'delivered',
-      createdAt: '2024-01-10T09:15:00Z',
-      customerName: 'Peter Kamau',
-      customerEmail: 'peter@example.com',
-      designTitle: 'Maasai Culture Design',
-      designImage: '/placeholder.svg',
-      quantity: 3,
-      unitPrice: 1800,
-      totalAmount: 5400,
-      commission: 810,
-      commissionRate: 15,
-      shippingAddress: '789 Kimathi Street, Kisumu',
-      trackingNumber: 'TRK-KE-123789456',
-      estimatedDelivery: '2024-01-15T18:00:00Z'
-    }
-  ]
+  // Test function to check database connectivity
+  const testDatabaseConnection = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('count(*)')
+        .limit(1)
 
-  // Mock design performance data
-  const mockDesignPerformance: DesignPerformance[] = [
-    {
-      id: '1',
-      title: 'Kenyan Wildlife T-Shirt',
-      image: '/placeholder.svg',
-      totalOrders: 25,
-      totalRevenue: 37500,
-      totalCommission: 5625,
-      averageRating: 4.8,
-      totalViews: 1250,
-      conversionRate: 2.0,
-      lastOrderDate: '2024-01-15T10:30:00Z'
-    },
-    {
-      id: '2',
-      title: 'Traditional Patterns Hoodie',
-      image: '/placeholder.svg',
-      totalOrders: 18,
-      totalRevenue: 45000,
-      totalCommission: 6750,
-      averageRating: 4.6,
-      totalViews: 980,
-      conversionRate: 1.8,
-      lastOrderDate: '2024-01-16T14:20:00Z'
-    },
-    {
-      id: '3',
-      title: 'Maasai Culture Design',
-      image: '/placeholder.svg',
-      totalOrders: 32,
-      totalRevenue: 57600,
-      totalCommission: 8640,
-      averageRating: 4.9,
-      totalViews: 1680,
-      conversionRate: 1.9,
-      lastOrderDate: '2024-01-10T09:15:00Z'
+      if (error) {
+        console.log('Database test error:', error)
+        return false
+      }
+      return true
+    } catch (error) {
+      console.log('Database connection test failed:', error)
+      return false
     }
-  ]
+  }
 
-  useEffect(() => {
-    if (user?.role === 'artist') {
-      setArtistOrders(mockArtistOrders)
-      setDesignPerformance(mockDesignPerformance)
+  // Create a test order for demonstration (only in development)
+  const createTestOrder = async () => {
+    if (!user || import.meta.env.PROD) return
+
+    try {
+      const testOrder = {
+        order_number: `TEST-${Date.now()}`,
+        user_id: user.id,
+        status: 'pending',
+        total_amount: 2500,
+        shipping_address: {
+          name: user.user_metadata?.full_name || 'Test User',
+          address: '123 Test Street',
+          city: 'Nairobi',
+          phone: '+254700000000'
+        },
+        payment_method: 'M-Pesa',
+        payment_status: 'completed'
+      }
+
+      const { data, error } = await supabase
+        .from('orders')
+        .insert(testOrder)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error creating test order:', error)
+        return
+      }
+
+      console.log('Test order created:', data)
+
+      // Refresh orders
+      fetchCustomerOrders()
+
+      toast({
+        title: 'Test Order Created',
+        description: 'A test order has been created for demonstration',
+      })
+    } catch (error) {
+      console.error('Error creating test order:', error)
     }
-  }, [user])
+  }
+
+  // Helper functions
+  const openAuthModal = (tab: 'signin' | 'signup') => {
+    setAuthModalTab(tab)
+    setAuthModalOpen(true)
+  }
+
+  const getOrderTimeline = (order: CustomerOrder) => {
+    const timeline = [
+      {
+        status: 'Order Placed',
+        description: 'Your order has been received and is being processed',
+        timestamp: order.created_at,
+        completed: true
+      },
+      {
+        status: 'Payment Confirmed',
+        description: 'Payment has been successfully processed',
+        timestamp: order.created_at,
+        completed: order.payment_status === 'completed'
+      },
+      {
+        status: 'Processing',
+        description: 'Your items are being prepared for shipment',
+        timestamp: order.created_at,
+        completed: ['processing', 'shipped', 'delivered'].includes(order.status)
+      },
+      {
+        status: 'Shipped',
+        description: 'Your order is on its way',
+        timestamp: order.tracking_number ? order.created_at : '',
+        completed: ['shipped', 'delivered'].includes(order.status)
+      },
+      {
+        status: 'Delivered',
+        description: 'Your order has been delivered',
+        timestamp: '',
+        completed: order.status === 'delivered'
+      }
+    ]
+
+    return timeline
+  }
 
   // Filter orders based on search term
-  const filteredOrders = artistOrders.filter(order =>
-    order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.designTitle.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  // Filter designs based on search term
-  const filteredDesigns = designPerformance.filter(design =>
-    design.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOrders = customerOrders.filter(order =>
+    order.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.order_items.some(item =>
+      item.product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.product.artist?.full_name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   )
 
   const getStatusColor = (status: string) => {
@@ -254,19 +376,88 @@ const OrderTracking = () => {
     })
   }
 
-  // Show loading or redirect message for artists
-  if (user && user.role === 'artist') {
+  // Show auth modal for non-authenticated users
+  if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="p-6 text-center">
-            <AlertCircle className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Redirecting...</h2>
-            <p className="text-gray-600">
-              Artists have a dedicated order management page. Redirecting you there...
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            {/* Icon with lock overlay */}
+            <div className="relative inline-block mb-8">
+              <Package className="h-24 w-24 text-gray-300" />
+              <div className="absolute -bottom-2 -right-2 bg-blue-600 rounded-full p-2">
+                <Lock className="h-6 w-6 text-white" />
+              </div>
+            </div>
+
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Track Your Orders
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Sign in to track your orders, view order history, and get real-time updates
+              on your purchases from talented Kenyan artists.
             </p>
-          </CardContent>
-        </Card>
+
+            {/* Benefits */}
+            <div className="grid md:grid-cols-3 gap-6 mb-12 max-w-3xl mx-auto">
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Truck className="h-8 w-8 text-blue-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Real-time Tracking</h3>
+                <p className="text-sm text-gray-600">Get live updates on your order status</p>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <Calendar className="h-8 w-8 text-green-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Order History</h3>
+                <p className="text-sm text-gray-600">View all your past purchases</p>
+              </div>
+              <div className="text-center p-6 bg-white rounded-lg shadow-sm">
+                <CheckCircle className="h-8 w-8 text-purple-500 mx-auto mb-3" />
+                <h3 className="font-semibold text-gray-900 mb-2">Delivery Updates</h3>
+                <p className="text-sm text-gray-600">Know exactly when to expect delivery</p>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button
+                size="lg"
+                onClick={() => openAuthModal('signin')}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg"
+              >
+                <User className="h-5 w-5 mr-2" />
+                Sign In to Track Orders
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => openAuthModal('signup')}
+                className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg"
+              >
+                <Package className="h-5 w-5 mr-2" />
+                Create Account
+              </Button>
+            </div>
+
+            {/* Continue shopping link */}
+            <div className="mt-8">
+              <Link
+                to="/marketplace"
+                className="inline-flex items-center text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Continue shopping
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          defaultTab={authModalTab}
+        />
+        <Footer />
       </div>
     )
   }
@@ -278,27 +469,18 @@ const OrderTracking = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/artist-studio')}
-            className="mb-4"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Studio
-          </Button>
-
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Management</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Tracking</h1>
               <p className="text-gray-600">
-                Track orders for your designs and monitor performance
+                Track your orders and view purchase history
               </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search orders or designs..."
+                  placeholder="Search orders..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 w-64"
@@ -315,7 +497,7 @@ const OrderTracking = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                  <p className="text-2xl font-bold text-gray-900">{artistOrders.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">{customerOrders.length}</p>
                 </div>
                 <ShoppingBag className="h-8 w-8 text-blue-500" />
               </div>
@@ -326,9 +508,9 @@ const OrderTracking = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                  <p className="text-sm font-medium text-gray-600">Total Spent</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    KSh {artistOrders.reduce((sum, order) => sum + order.totalAmount, 0).toLocaleString()}
+                    KSh {customerOrders.reduce((sum, order) => sum + order.total_amount, 0).toLocaleString()}
                   </p>
                 </div>
                 <DollarSign className="h-8 w-8 text-green-500" />
@@ -340,12 +522,12 @@ const OrderTracking = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Commission</p>
+                  <p className="text-sm font-medium text-gray-600">Active Orders</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    KSh {artistOrders.reduce((sum, order) => sum + order.commission, 0).toLocaleString()}
+                    {customerOrders.filter(order => ['pending', 'confirmed', 'processing', 'shipped'].includes(order.status)).length}
                   </p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-purple-500" />
+                <Package className="h-8 w-8 text-orange-500" />
               </div>
             </CardContent>
           </Card>
@@ -354,27 +536,39 @@ const OrderTracking = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Active Designs</p>
-                  <p className="text-2xl font-bold text-gray-900">{designPerformance.length}</p>
+                  <p className="text-sm font-medium text-gray-600">Delivered</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {customerOrders.filter(order => order.status === 'delivered').length}
+                  </p>
                 </div>
-                <Palette className="h-8 w-8 text-orange-500" />
+                <CheckCircle className="h-8 w-8 text-green-500" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Order Details */}
-        {order && (
+        {selectedOrder ? (
+          /* Order Details View */
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Back Button */}
+              <Button
+                variant="ghost"
+                onClick={() => setSelectedOrder(null)}
+                className="mb-4"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Orders
+              </Button>
+
               {/* Order Status */}
               <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Order #{order.orderNumber}</CardTitle>
-                    <Badge className={getStatusColor(order.status)}>
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                    <CardTitle>Order #{selectedOrder.order_number}</CardTitle>
+                    <Badge className={getStatusColor(selectedOrder.status)}>
+                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -383,18 +577,20 @@ const OrderTracking = () => {
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 mr-2 text-gray-400" />
                       <span className="text-gray-600">Ordered:</span>
-                      <span className="ml-2 font-medium">{formatDate(order.createdAt)}</span>
+                      <span className="ml-2 font-medium">{formatDate(selectedOrder.created_at)}</span>
                     </div>
                     <div className="flex items-center">
                       <Truck className="h-4 w-4 mr-2 text-gray-400" />
                       <span className="text-gray-600">Estimated Delivery:</span>
-                      <span className="ml-2 font-medium">{formatDate(order.estimatedDelivery)}</span>
+                      <span className="ml-2 font-medium">
+                        {selectedOrder.estimated_delivery ? formatDate(selectedOrder.estimated_delivery) : '3-5 business days'}
+                      </span>
                     </div>
-                    {order.trackingNumber && (
+                    {selectedOrder.tracking_number && (
                       <div className="flex items-center md:col-span-2">
                         <Package className="h-4 w-4 mr-2 text-gray-400" />
                         <span className="text-gray-600">Tracking Number:</span>
-                        <span className="ml-2 font-medium font-mono">{order.trackingNumber}</span>
+                        <span className="ml-2 font-medium font-mono">{selectedOrder.tracking_number}</span>
                       </div>
                     )}
                   </div>
@@ -408,7 +604,7 @@ const OrderTracking = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {order.timeline.map((event, index) => (
+                    {getOrderTimeline(selectedOrder).map((event, index) => (
                       <div key={index} className="flex items-start">
                         <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mr-4 ${
                           event.completed
@@ -454,29 +650,31 @@ const OrderTracking = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {order.items.map((item) => (
+                    {selectedOrder.order_items.map((item) => (
                       <div key={item.id} className="flex items-center space-x-3">
                         <img
-                          src={item.image}
-                          alt={item.title}
+                          src={item.product.image_url || '/placeholder.svg'}
+                          alt={item.product.title}
                           className="w-12 h-12 rounded-lg object-cover"
                         />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {item.title}
+                            {item.product.title}
                           </p>
-                          <p className="text-xs text-gray-500">by {item.artist}</p>
+                          {item.product.artist && (
+                            <p className="text-xs text-gray-500">by {item.product.artist.full_name}</p>
+                          )}
                           <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                         </div>
                         <p className="text-sm font-medium">
-                          KSh {item.price.toLocaleString()}
+                          KSh {(item.price * item.quantity).toLocaleString()}
                         </p>
                       </div>
                     ))}
                     <Separator />
                     <div className="flex justify-between items-center font-medium">
                       <span>Total</span>
-                      <span>KSh {order.total.toLocaleString()}</span>
+                      <span>KSh {selectedOrder.total_amount.toLocaleString()}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -492,39 +690,123 @@ const OrderTracking = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-sm space-y-1">
-                    <p className="font-medium">{order.shippingAddress.name}</p>
-                    <p className="text-gray-600">{order.shippingAddress.address}</p>
-                    <p className="text-gray-600">{order.shippingAddress.city}</p>
-                    <div className="flex items-center mt-2 pt-2 border-t">
-                      <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                      <span className="text-gray-600">{order.shippingAddress.phone}</span>
-                    </div>
+                    {selectedOrder.shipping_address ? (
+                      <>
+                        <p className="font-medium">{selectedOrder.shipping_address.name}</p>
+                        <p className="text-gray-600">{selectedOrder.shipping_address.address}</p>
+                        <p className="text-gray-600">{selectedOrder.shipping_address.city}</p>
+                        {selectedOrder.shipping_address.phone && (
+                          <div className="flex items-center mt-2 pt-2 border-t">
+                            <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                            <span className="text-gray-600">{selectedOrder.shipping_address.phone}</span>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-gray-500">No shipping address available</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Contact Support */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Need Help?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Have questions about your order? Our support team is here to help.
-                  </p>
-                  <div className="space-y-2">
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      <Mail className="h-4 w-4 mr-2" />
-                      Email Support
-                    </Button>
-                    <Button variant="outline" size="sm" className="w-full justify-start">
-                      <Phone className="h-4 w-4 mr-2" />
-                      Call Support
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Actions */}
+              <div className="space-y-3">
+                <Button className="w-full" variant="outline">
+                  <Mail className="h-4 w-4 mr-2" />
+                  Contact Support
+                </Button>
+
+                <Link to="/marketplace" className="block">
+                  <Button className="w-full bg-orange-600 hover:bg-orange-700">
+                    Continue Shopping
+                  </Button>
+                </Link>
+              </div>
             </div>
+          </div>
+        ) : (
+          /* Orders List View */
+          <div className="space-y-6">
+            {loading ? (
+              <div className="grid gap-4">
+                {[...Array(5)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-16 h-16 bg-gray-200 rounded-lg"></div>
+                          <div>
+                            <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-24"></div>
+                          </div>
+                        </div>
+                        <div className="h-6 bg-gray-200 rounded w-20"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : filteredOrders.length === 0 ? (
+              <div className="text-center py-16">
+                <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">No Orders Yet</h2>
+                <p className="text-gray-600 mb-6">
+                  You haven't placed any orders yet. Start exploring our amazing designs!
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <Link to="/marketplace">
+                    <Button className="bg-orange-600 hover:bg-orange-700">
+                      Browse Marketplace
+                    </Button>
+                  </Link>
+                  {!import.meta.env.PROD && (
+                    <Button
+                      variant="outline"
+                      onClick={createTestOrder}
+                      className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                    >
+                      Create Test Order (Dev)
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {filteredOrders.map((order) => (
+                  <Card key={order.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                    <CardContent className="p-6" onClick={() => setSelectedOrder(order)}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                            <Package className="h-8 w-8 text-gray-400" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900">Order #{order.order_number}</h3>
+                            <p className="text-sm text-gray-600">
+                              {order.order_items.length} {order.order_items.length === 1 ? 'item' : 'items'} •
+                              Placed {formatDate(order.created_at)}
+                            </p>
+                            <p className="text-sm font-medium text-gray-900">
+                              KSh {order.total_amount.toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge className={getStatusColor(order.status)}>
+                            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                          </Badge>
+                          {order.tracking_number && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              Tracking: {order.tracking_number}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

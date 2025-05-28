@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useData } from '@/contexts/DataContext'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
@@ -41,6 +42,7 @@ import {
 
 const ArtistStudio = () => {
   const { user, profile } = useAuth()
+  const { invalidateProductCache } = useData()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -189,6 +191,9 @@ const ArtistStudio = () => {
 
       if (error) throw error
 
+      // Invalidate product cache to trigger immediate marketplace update
+      invalidateProductCache()
+
       toast({
         title: 'Success',
         description: 'Product uploaded successfully!',
@@ -245,6 +250,9 @@ const ArtistStudio = () => {
         .eq('id', productId)
 
       if (error) throw error
+
+      // Invalidate product cache to trigger immediate marketplace update
+      invalidateProductCache()
 
       toast({
         title: 'Success',
@@ -310,38 +318,41 @@ const ArtistStudio = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
-          <div className="mb-6 lg:mb-0">
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 flex items-center gap-3 mb-2">
-              <div className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl">
-                <Palette className="h-8 w-8 text-white" />
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 sm:mb-8">
+          <div className="mb-4 sm:mb-6 lg:mb-0">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+              <div className="p-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl w-fit">
+                <Palette className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
               </div>
-              Artist Studio
+              <span>Artist Studio</span>
             </h1>
-            <p className="text-gray-600 text-lg">Manage your designs, track performance, and grow your business</p>
+            <p className="text-gray-600 text-sm sm:text-base lg:text-lg">Manage your designs, track performance, and grow your business</p>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <Button
               variant="outline"
               onClick={() => navigate('/analytics')}
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 min-h-[48px] text-sm sm:text-base"
             >
               <BarChart3 className="h-4 w-4" />
-              Analytics
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Stats</span>
             </Button>
             <Button
               variant="outline"
               onClick={() => navigate('/artist-orders')}
-              className="flex items-center gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+              className="flex items-center justify-center gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 min-h-[48px] text-sm sm:text-base"
             >
               <Package className="h-4 w-4" />
-              Order Management
+              <span className="hidden sm:inline">Order Management</span>
+              <span className="sm:hidden">Orders</span>
             </Button>
-            <Link to="/upload-design">
-              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center gap-2">
+            <Link to="/upload-design" className="w-full sm:w-auto">
+              <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center justify-center gap-2 min-h-[48px] text-sm sm:text-base">
                 <Plus className="h-4 w-4" />
-                Upload Design
+                <span className="hidden sm:inline">Upload Design</span>
+                <span className="sm:hidden">Upload</span>
               </Button>
             </Link>
           </div>
@@ -365,9 +376,10 @@ const ArtistStudio = () => {
               </div>
               <WithdrawalModal
                 trigger={
-                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white min-h-[48px]">
                     <Wallet className="h-4 w-4 mr-2" />
-                    Request Withdrawal
+                    <span className="hidden sm:inline">Request Withdrawal</span>
+                    <span className="sm:hidden">Withdraw</span>
                   </Button>
                 }
               />
@@ -427,37 +439,42 @@ const ArtistStudio = () => {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5 bg-white shadow-sm border border-gray-200 rounded-xl p-1">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5 bg-white shadow-sm border border-gray-200 rounded-xl p-1 h-auto">
             <TabsTrigger
               value="overview"
-              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white min-h-[44px] text-xs sm:text-sm px-2 sm:px-3"
             >
-              Overview
+              <span className="hidden sm:inline">Overview</span>
+              <span className="sm:hidden">📊</span>
             </TabsTrigger>
             <TabsTrigger
               value="products"
-              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white min-h-[44px] text-xs sm:text-sm px-2 sm:px-3"
             >
-              Products
+              <span className="hidden sm:inline">Products</span>
+              <span className="sm:hidden">🎨</span>
             </TabsTrigger>
             <TabsTrigger
               value="earnings"
-              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white min-h-[44px] text-xs sm:text-sm px-2 sm:px-3"
             >
-              Earnings
+              <span className="hidden sm:inline">Earnings</span>
+              <span className="sm:hidden">💰</span>
             </TabsTrigger>
             <TabsTrigger
               value="orders"
-              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white min-h-[44px] text-xs sm:text-sm px-2 sm:px-3"
             >
-              Orders
+              <span className="hidden sm:inline">Orders</span>
+              <span className="sm:hidden">📦</span>
             </TabsTrigger>
             <TabsTrigger
               value="reviews"
-              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white"
+              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white min-h-[44px] text-xs sm:text-sm px-2 sm:px-3"
             >
-              Reviews
+              <span className="hidden sm:inline">Reviews</span>
+              <span className="sm:hidden">⭐</span>
             </TabsTrigger>
           </TabsList>
 
@@ -581,26 +598,27 @@ const ArtistStudio = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="products" className="space-y-6">
+          <TabsContent value="products" className="space-y-4 sm:space-y-6">
             {/* Search and Filter */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Search your designs..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 min-h-[48px] text-base"
+                  style={{ fontSize: '16px' }}
                 />
               </div>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-full sm:w-48">
+                <SelectTrigger className="w-full sm:w-48 min-h-[48px] text-base">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Products</SelectItem>
-                  <SelectItem value="active">Active Only</SelectItem>
-                  <SelectItem value="inactive">Inactive Only</SelectItem>
+                  <SelectItem value="all" className="min-h-[44px]">All Products</SelectItem>
+                  <SelectItem value="active" className="min-h-[44px]">Active Only</SelectItem>
+                  <SelectItem value="inactive" className="min-h-[44px]">Inactive Only</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -646,18 +664,18 @@ const ArtistStudio = () => {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1">
+                        <Button variant="outline" size="sm" className="flex-1 min-h-[44px]">
                           <Edit className="h-4 w-4 mr-1" />
-                          Edit
+                          <span className="hidden sm:inline">Edit</span>
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="min-h-[44px] min-w-[44px]">
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => deleteProduct(product.id)}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-red-600 hover:text-red-700 min-h-[44px] min-w-[44px]"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

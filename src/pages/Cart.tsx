@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useCart } from '@/hooks/useData'
+import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -27,7 +27,7 @@ import {
 
 const Cart = () => {
   const { user } = useAuth()
-  const { cartItems, loading, removeFromCart, updateCartItem, cartTotal, cartCount } = useCart()
+  const { cartItems, loading, removeFromCart, updateQuantity, cartTotal, cartCount } = useCart()
   const [processingCheckout, setProcessingCheckout] = useState(false)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authModalTab, setAuthModalTab] = useState<'signin' | 'signup'>('signin')
@@ -35,8 +35,9 @@ const Cart = () => {
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return
 
-    const { error } = await updateCartItem(itemId, newQuantity)
-    if (error) {
+    try {
+      await updateQuantity(itemId, newQuantity)
+    } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to update quantity',
@@ -46,17 +47,13 @@ const Cart = () => {
   }
 
   const handleRemoveItem = async (itemId: string) => {
-    const { error } = await removeFromCart(itemId)
-    if (error) {
+    try {
+      await removeFromCart(itemId)
+    } catch (error) {
       toast({
         title: 'Error',
         description: 'Failed to remove item',
         variant: 'destructive',
-      })
-    } else {
-      toast({
-        title: 'Item removed',
-        description: 'Item has been removed from your cart',
       })
     }
   }
@@ -113,11 +110,11 @@ const Cart = () => {
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
               <Button
                 size="lg"
                 onClick={() => openAuthModal('signin')}
-                className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 text-lg"
+                className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white px-6 sm:px-8 py-3 text-base sm:text-lg min-h-[48px]"
               >
                 <User className="h-5 w-5 mr-2" />
                 Sign In to Your Cart
@@ -126,7 +123,7 @@ const Cart = () => {
                 size="lg"
                 variant="outline"
                 onClick={() => openAuthModal('signup')}
-                className="border-orange-600 text-orange-600 hover:bg-orange-50 px-8 py-3 text-lg"
+                className="w-full sm:w-auto border-orange-600 text-orange-600 hover:bg-orange-50 px-6 sm:px-8 py-3 text-base sm:text-lg min-h-[48px]"
               >
                 <Palette className="h-5 w-5 mr-2" />
                 Create Account
@@ -242,13 +239,14 @@ const Cart = () => {
                           </Button>
                         </div>
 
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
+                          <div className="flex items-center gap-2 sm:gap-3">
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                               disabled={item.quantity <= 1}
+                              className="min-h-[44px] min-w-[44px]"
                             >
                               <Minus className="h-4 w-4" />
                             </Button>
@@ -256,20 +254,22 @@ const Cart = () => {
                               type="number"
                               value={item.quantity}
                               onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
-                              className="w-20 text-center"
+                              className="w-16 sm:w-20 text-center min-h-[44px] text-base"
                               min="1"
+                              style={{ fontSize: '16px' }}
                             />
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                              className="min-h-[44px] min-w-[44px]"
                             >
                               <Plus className="h-4 w-4" />
                             </Button>
                           </div>
 
-                          <div className="text-right">
-                            <div className="font-bold text-lg">
+                          <div className="text-left sm:text-right">
+                            <div className="font-bold text-base sm:text-lg">
                               KSh {((item.product?.price || 0) * item.quantity).toLocaleString()}
                             </div>
                             <div className="text-sm text-gray-500">
@@ -311,7 +311,7 @@ const Cart = () => {
                   <Button
                     onClick={handleCheckout}
                     disabled={processingCheckout}
-                    className="w-full bg-orange-600 hover:bg-orange-700"
+                    className="w-full bg-orange-600 hover:bg-orange-700 min-h-[48px] text-base"
                     size="lg"
                   >
                     <CreditCard className="h-4 w-4 mr-2" />
