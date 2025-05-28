@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useProducts } from '@/hooks/useData';
+import { useData } from '@/contexts/DataContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { User, Heart, ShoppingCart, Star, Send, Palette } from 'lucide-react';
 
 const FeaturedDesigns = () => {
-  const { products, loading } = useProducts({ featured: true });
+  const { products, productsLoading: loading } = useData();
 
   // Show first 6 products or fallback to empty array
   const featuredProducts = products.slice(0, 6);

@@ -2,13 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useStats, useFeaturedProducts } from '@/hooks/useData';
+import { useData } from '@/contexts/DataContext';
 import { ArrowRight, Sparkles, Palette, Users, Star, Heart, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 
 
 const HeroSection = () => {
-  const { stats, loading } = useStats();
-  const { featuredProducts, loading: productsLoading } = useFeaturedProducts();
+  const { stats, statsLoading, featuredProducts, featuredLoading } = useData();
 
   // Carousel state management
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -157,19 +156,19 @@ const HeroSection = () => {
             <div className="grid grid-cols-3 gap-6 pt-2">
               <div className="text-center">
                 <div className="text-2xl lg:text-3xl font-semibold text-gray-700">
-                  {loading ? '...' : stats.artistCount > 0 ? `${stats.artistCount}+` : '0'}
+                  {statsLoading ? '...' : stats.artistCount > 0 ? `${stats.artistCount}+` : '0'}
                 </div>
                 <div className="text-sm lg:text-base text-gray-500 font-medium">Active Artists</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl lg:text-3xl font-semibold text-gray-700">
-                  {loading ? '...' : stats.productCount > 0 ? `${stats.productCount}+` : '0'}
+                  {statsLoading ? '...' : stats.productCount > 0 ? `${stats.productCount}+` : '0'}
                 </div>
                 <div className="text-sm lg:text-base text-gray-500 font-medium">Designs Available</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl lg:text-3xl font-semibold text-gray-700">
-                  {loading ? '...' : stats.orderCount > 0 ? `${stats.orderCount}+` : '0'}
+                  {statsLoading ? '...' : stats.orderCount > 0 ? `${stats.orderCount}+` : '0'}
                 </div>
                 <div className="text-sm lg:text-base text-gray-500 font-medium">Orders Completed</div>
               </div>
@@ -224,7 +223,7 @@ const HeroSection = () => {
                     border: '1px solid rgba(255,255,255,0.2)'
                   }}
                 >
-                  {productsLoading ? (
+                  {featuredLoading ? (
                     // Loading skeleton
                     <div className="bg-gradient-to-br from-gray-100 to-gray-200 aspect-[16/10] animate-pulse">
                       <div className="h-full flex items-center justify-center">

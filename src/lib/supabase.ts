@@ -3,14 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://xrqfckeuzzgnwkutxqkx.supabase.co'
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhycWZja2V1enpnbndrdXR4cWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyOTQ5MDUsImV4cCI6MjA2Mzg3MDkwNX0.QGEZZ2lkSc7J6BEY_Vub1FxxmX8sSkqdG50aCJq0R6Q'
 
-// Debug logging
-console.log('Supabase URL:', supabaseUrl)
-console.log('Supabase Key (first 20 chars):', supabaseAnonKey?.substring(0, 20) + '...')
-
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables')
-  console.error('VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL)
-  console.error('VITE_SUPABASE_ANON_KEY:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Present' : 'Missing')
   throw new Error('Missing Supabase environment variables')
 }
 
@@ -18,12 +11,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+    storageKey: 'brandy-shop-auth-token',
+    flowType: 'pkce'
   },
   global: {
     headers: {
-      'apikey': supabaseAnonKey,
-      'Authorization': `Bearer ${supabaseAnonKey}`
+      'apikey': supabaseAnonKey
     }
   },
   db: {
@@ -31,16 +26,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 })
 
-// Test connection on initialization
-supabase.from('products').select('count', { count: 'exact', head: true }).then(
-  ({ count, error }) => {
-    if (error) {
-      console.error('Supabase connection test failed:', error)
-    } else {
-      console.log('✅ Supabase connected successfully. Products count:', count)
-    }
-  }
-)
+
 
 // Types for our database
 export type UserRole = 'customer' | 'artist' | 'admin'

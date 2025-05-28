@@ -170,12 +170,10 @@ class DeepAIService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('DeepAI API error response:', errorText);
         throw new Error(`DeepAI API error: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('DeepAI response:', data);
 
       if (!data.output_url) {
         throw new Error('No image URL returned from DeepAI');
@@ -189,7 +187,6 @@ class DeepAIService {
       };
 
     } catch (error) {
-      console.error('DeepAI generation error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to generate AI image'

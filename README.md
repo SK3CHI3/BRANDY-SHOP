@@ -248,6 +248,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 [![Star on GitHub](https://img.shields.io/github/stars/SK3CHI3/brandy-shop?style=social)](https://github.com/SK3CHI3/brandy-shop)
 
-**[🌐 Visit Live Site]() | [📖 Read Documentation](docs/) | [🤝 Contribute](CONTRIBUTING.md)**
+**[🌐 Visit Live Site](https://brandyshop.netlify.app) | [📖 Read Documentation](docs/) | [🤝 Contribute](CONTRIBUTING.md)**
 
 </div>

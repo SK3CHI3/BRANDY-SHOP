@@ -1,8 +1,17 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "brandy-shop",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "Kenyan Creative Marketplace - Connecting artists with customers for custom apparel and branded products",
+  "author": "SKECHIE <vomollo101@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SK3CHI3/brandy-shop.git"
+  },
+  "homepage": "https://brandyshop.netlify.app",
+  "keywords": ["kenya", "marketplace", "artists", "custom-design", "e-commerce", "react", "typescript"],
   "scripts": {
     "dev": "vite",
     "build": "vite build",

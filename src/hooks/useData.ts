@@ -1,83 +1,33 @@
 import { useState, useEffect } from 'react'
 import { supabase, Product, Category, Profile, ArtistProfile, Order, Review, Favorite, CartItem } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
+import { useData as useGlobalData } from '@/contexts/DataContext'
 
-// Products hooks
+// Optimized Products hooks using global data
 export const useProducts = (filters?: { category?: string; artist?: string; featured?: boolean }) => {
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const globalData = useGlobalData()
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true)
-      try {
-        // Simplified query without complex joins
-        let query = supabase
-          .from('products')
-          .select('*')
-          .eq('is_active', true)
-          .order('created_at', { ascending: false })
-
-        if (filters?.category && filters.category !== 'all') {
-          query = query.eq('category_id', filters.category)
-        }
-        if (filters?.artist) {
-          query = query.eq('artist_id', filters.artist)
-        }
-        if (filters?.featured) {
-          query = query.eq('is_featured', true)
-        }
-
-        const { data, error } = await query
-
-        if (error) {
-          console.error('Products fetch error:', error)
-          // Provide mock data as fallback
-          setProducts(getMockProducts(filters))
-          setError(`Database error: ${error.message}`)
-        } else {
-          // Fetch artist and category data separately to avoid join issues
-          const productsWithDetails = await Promise.all(
-            (data || []).map(async (product) => {
-              const [artistResult, categoryResult] = await Promise.all([
-                product.artist_id ? supabase
-                  .from('profiles')
-                  .select('id, full_name, avatar_url')
-                  .eq('id', product.artist_id)
-                  .single() : Promise.resolve({ data: null }),
-                product.category_id ? supabase
-                  .from('categories')
-                  .select('id, name')
-                  .eq('id', product.category_id)
-                  .single() : Promise.resolve({ data: null })
-              ])
-
-              return {
-                ...product,
-                artist: artistResult.data,
-                category: categoryResult.data
-              }
-            })
-          )
-
-          setProducts(productsWithDetails)
-          setError(null)
-        }
-      } catch (err) {
-        console.error('Products fetch error:', err)
-        setError(err instanceof Error ? err.message : 'An error occurred')
-        // Provide mock data as fallback
-        setProducts(getMockProducts(filters))
-      } finally {
-        setLoading(false)
-      }
+    // If specific filters are provided, fetch fresh data
+    if (filters && (filters.category || filters.artist)) {
+      console.log('🛍️ Fetching products with specific filters:', filters)
+      globalData.refreshProducts(filters)
+    } else if (filters?.featured) {
+      // For featured products, use the global featured products
+      setFilteredProducts(globalData.featuredProducts)
+    } else {
+      // For general products, use global products
+      setFilteredProducts(globalData.products)
     }
+  }, [filters?.category, filters?.artist, filters?.featured, globalData.products, globalData.featuredProducts])
 
-    fetchProducts()
-  }, [filters?.category, filters?.artist, filters?.featured])
-
-  return { products, loading, error }
+  return {
+    products: filteredProducts,
+    loading: globalData.productsLoading,
+    error
+  }
 }
 
 // Mock data for when database is not set up
@@ -495,136 +445,14 @@ export const useCart = () => {
   }
 }
 
-// Stats hooks
+// Optimized Stats hook using global data
 export const useStats = () => {
-  const [stats, setStats] = useState({
-    artistCount: 0,
-    productCount: 0,
-    orderCount: 0
-  })
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        // Fetch all artist count from profiles table (not just verified)
-        const { count: artistCount, error: artistError } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .eq('role', 'artist')
-
-        // Fetch active product count
-        const { count: productCount, error: productError } = await supabase
-          .from('products')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_active', true)
-
-        // Fetch total order count (all orders, not just completed)
-        const { count: orderCount, error: orderError } = await supabase
-          .from('orders')
-          .select('*', { count: 'exact', head: true })
-
-        // Log the results for debugging
-        console.log('Stats Debug:', {
-          artistCount,
-          artistError,
-          productCount,
-          productError,
-          orderCount,
-          orderError
-        })
-
-        // Use mock data if tables don't exist
-        if (artistError?.code === '42P01' || productError?.code === '42P01' || orderError?.code === '42P01') {
-          console.log('Using mock data due to missing tables')
-          setStats({
-            artistCount: 15,
-            productCount: 127,
-            orderCount: 89
-          })
-        } else {
-          const finalStats = {
-            artistCount: artistCount || 0,
-            productCount: productCount || 0,
-            orderCount: orderCount || 0
-          }
-          console.log('Setting real stats:', finalStats)
-          setStats(finalStats)
-        }
-      } catch (error) {
-        console.error('Error fetching stats:', error)
-        // Fallback to mock data
-        setStats({
-          artistCount: 15,
-          productCount: 127,
-          orderCount: 89
-        })
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchStats()
-  }, [])
-
-  return { stats, loading }
+  const { stats, statsLoading } = useGlobalData()
+  return { stats, loading: statsLoading }
 }
 
-// Featured products for hero section
+// Optimized Featured Products hook using global data
 export const useFeaturedProducts = () => {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchFeaturedProducts = async () => {
-      setLoading(true)
-      try {
-        // Simplified query for featured products
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .eq('is_active', true)
-          .eq('is_featured', true)
-          .order('created_at', { ascending: false })
-          .limit(2)
-
-        if (error) {
-          console.error('Featured products fetch error:', error)
-          // Fallback to mock data
-          setFeaturedProducts(getMockProducts({ featured: true }).slice(0, 2))
-        } else {
-          // Fetch artist details separately for each product
-          const productsWithDetails = await Promise.all(
-            (data || []).map(async (product) => {
-              const artistResult = product.artist_id ? await supabase
-                .from('profiles')
-                .select('id, full_name, avatar_url')
-                .eq('id', product.artist_id)
-                .single() : { data: null }
-
-              return {
-                ...product,
-                artist: artistResult.data,
-                favoriteCount: 0, // Will be updated when favorites are implemented
-                averageRating: 0, // Will be updated when reviews are implemented
-                reviewCount: 0
-              }
-            })
-          )
-
-          setFeaturedProducts(productsWithDetails)
-        }
-      } catch (error) {
-        console.error('Error fetching featured products:', error)
-        // Fallback to mock data
-        setFeaturedProducts(getMockProducts({ featured: true }).slice(0, 2))
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchFeaturedProducts()
-  }, [])
-
-  return { featuredProducts, loading }
+  const { featuredProducts, featuredLoading } = useGlobalData()
+  return { featuredProducts, loading: featuredLoading }
 }

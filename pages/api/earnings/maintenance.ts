@@ -42,13 +42,10 @@ export default async function handler(
   }
 
   try {
-    console.log('🤖 Starting automated earnings maintenance...')
-    
     // Run the scheduled maintenance
     const { result, error } = await earningsSchedulerService.runScheduledMaintenance()
 
     if (error) {
-      console.error('❌ Maintenance failed:', error)
       return res.status(500).json({
         success: false,
         error: error,
@@ -57,14 +54,6 @@ export default async function handler(
     }
 
     if (result) {
-      console.log('✅ Maintenance completed successfully:', result)
-      
-      // Log the results
-      if (result.pending_updated > 0) {
-        console.log(`📈 Released KSh ${result.total_amount_released} to ${result.artists_affected} artists`)
-      } else {
-        console.log('ℹ️ No pending earnings ready for release')
-      }
 
       return res.status(200).json({
         success: true,
