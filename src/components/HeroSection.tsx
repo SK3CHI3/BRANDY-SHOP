@@ -1,9 +1,10 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useData } from '@/contexts/DataContext';
-import { ArrowRight, Sparkles, Palette, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
+import { ArrowRight, Sparkles, Palette, Users, Star, Heart, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
+
 
 const HeroSection = () => {
   const { stats, statsLoading, featuredProducts, featuredLoading } = useData();
@@ -121,31 +122,32 @@ const HeroSection = () => {
             <div className="space-y-4 sm:space-y-6">
               <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-white/80 backdrop-blur-sm rounded-full border border-orange-200 shadow-sm">
                 <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-orange-600 mr-1.5 sm:mr-2" />
-                <span className="text-xs sm:text-sm font-medium text-gray-700">Fair Artist Marketplace</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-700">Where Creativity Meets Commerce</span>
               </div>
 
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-900 leading-tight">
-                Support
+                Wear Your
                 <span className="block bg-gradient-to-r from-orange-600 via-red-500 to-pink-600 bg-clip-text text-transparent">
-                  Kenyan Artists
+                  Story
                 </span>
               </h1>
 
               <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-2xl">
-                Connect with Kenya's most talented artists in a fair marketplace. Artists keep 92.3% of every sale with our transparent 7.7% commission structure.
+                Connect with Kenya's most talented artists to create custom apparel that speaks your language.
+                From unique designs to personalized masterpieces, we bring your vision to life.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
               <Link to="/marketplace" className="w-full sm:w-auto">
                 <Button size="lg" className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-sm sm:text-base lg:text-lg px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 w-full min-h-[48px]">
-                  Support Artists
+                  Explore Designs
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                 </Button>
               </Link>
               <Link to="/custom-studio" className="w-full sm:w-auto">
                 <Button variant="outline" size="lg" className="text-sm sm:text-base lg:text-lg px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 border-2 border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 transition-all duration-300 w-full min-h-[48px]">
-                  Request Custom
+                  Start Creating
                   <Palette className="ml-2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                 </Button>
               </Link>
@@ -160,9 +162,9 @@ const HeroSection = () => {
               </div>
               <div className="text-center">
                 <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-700">
-                  92.3%
+                  {statsLoading ? '...' : stats.productCount > 0 ? `${stats.productCount}+` : '200+'}
                 </div>
-                <div className="text-xs sm:text-sm lg:text-base text-gray-500 font-medium">Artist Keeps</div>
+                <div className="text-xs sm:text-sm lg:text-base text-gray-500 font-medium">Designs Available</div>
               </div>
               <div className="text-center">
                 <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-700">
@@ -191,7 +193,7 @@ const HeroSection = () => {
                   </button>
                 </div>
 
-                {/* Navigation Arrows */}
+                {/* Navigation Arrows - Always visible on mobile, hover on desktop */}
                 <button
                   onClick={prevSlide}
                   className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-12 sm:h-12 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white hover:scale-110 transition-all duration-300 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transform sm:-translate-x-2 sm:group-hover:translate-x-0"
@@ -341,6 +343,24 @@ const HeroSection = () => {
                                           )}
                                         </div>
                                       )}
+
+                                      {/* Floating elements - only show on larger screens */}
+                                      <div
+                                        className="hidden lg:block absolute -top-2 -right-2 lg:-top-4 lg:-right-4 w-4 h-4 lg:w-8 lg:h-8 rounded-full animate-pulse"
+                                        style={{
+                                          background: 'rgba(255, 255, 255, 0.2)',
+                                          backdropFilter: 'blur(10px)',
+                                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                                        }}
+                                      ></div>
+                                      <div
+                                        className="hidden lg:block absolute -bottom-2 -left-2 lg:-bottom-4 lg:-left-4 w-3 h-3 lg:w-6 lg:h-6 rounded-full animate-pulse delay-1000"
+                                        style={{
+                                          background: 'rgba(255, 255, 255, 0.15)',
+                                          backdropFilter: 'blur(10px)',
+                                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                                        }}
+                                      ></div>
                                     </div>
                                   </div>
                                 </div>
