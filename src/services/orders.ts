@@ -236,7 +236,7 @@ class OrdersService {
     }
   }
 
-  // Update payment status
+  // Update payment status with automatic commission creation
   async updatePaymentStatus(
     orderId: string,
     paymentStatus: Order['payment_status'],
@@ -262,13 +262,11 @@ class OrdersService {
       }
 
       // If payment is completed, update order status to confirmed
-      // Note: Artist earnings will be created automatically by database trigger
+      // Commission records will be created automatically by database trigger
       if (paymentStatus === 'completed') {
-        // Update payment status to 'paid' which will trigger automatic earnings creation
         const { error: updateError } = await supabase
           .from('orders')
           .update({
-            payment_status: 'paid',
             status: 'confirmed',
             updated_at: new Date().toISOString()
           })
@@ -277,7 +275,7 @@ class OrdersService {
         if (updateError) {
           console.error('Failed to update order status:', updateError)
         } else {
-          await this.addTrackingUpdate(orderId, 'Payment Confirmed', 'Payment has been successfully processed and artist earnings have been created')
+          await this.addTrackingUpdate(orderId, 'Payment Confirmed', 'Payment has been successfully processed and artist commissions have been created')
         }
       }
 
@@ -374,9 +372,6 @@ class OrdersService {
       }
     }
   }
-
-  // Note: Artist earnings are now created automatically by database triggers
-  // when order payment_status changes to 'paid'. No manual intervention needed.
 }
 
 // Export singleton instance

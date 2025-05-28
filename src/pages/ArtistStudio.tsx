@@ -7,6 +7,7 @@ import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import WithdrawalModal from '@/components/WithdrawalModal'
 import WithdrawalHistory from '@/components/WithdrawalHistory'
+import CommissionDashboard from '@/components/CommissionDashboard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -440,7 +441,7 @@ const ArtistStudio = () => {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5 bg-white shadow-sm border border-gray-200 rounded-xl p-1 h-auto">
+          <TabsList className="grid w-full grid-cols-6 lg:w-auto lg:grid-cols-6 bg-white shadow-sm border border-gray-200 rounded-xl p-1 h-auto">
             <TabsTrigger
               value="overview"
               className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white min-h-[44px] text-xs sm:text-sm px-2 sm:px-3"
@@ -456,11 +457,18 @@ const ArtistStudio = () => {
               <span className="sm:hidden">🎨</span>
             </TabsTrigger>
             <TabsTrigger
+              value="commissions"
+              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white min-h-[44px] text-xs sm:text-sm px-2 sm:px-3"
+            >
+              <span className="hidden sm:inline">Commissions</span>
+              <span className="sm:hidden">💰</span>
+            </TabsTrigger>
+            <TabsTrigger
               value="earnings"
               className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white min-h-[44px] text-xs sm:text-sm px-2 sm:px-3"
             >
               <span className="hidden sm:inline">Earnings</span>
-              <span className="sm:hidden">💰</span>
+              <span className="sm:hidden">💳</span>
             </TabsTrigger>
             <TabsTrigger
               value="orders"
@@ -706,6 +714,10 @@ const ArtistStudio = () => {
                 )}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="commissions" className="space-y-6">
+            <CommissionDashboard />
           </TabsContent>
 
           <TabsContent value="earnings" className="space-y-6">
