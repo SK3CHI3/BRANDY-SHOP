@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Link } from 'react-router-dom'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
@@ -19,7 +19,10 @@ import {
   Clock,
   CheckCircle,
   ArrowRight,
-  Play
+  Play,
+  Percent,
+  DollarSign,
+  Users2
 } from 'lucide-react'
 
 const HowItWorksPage = () => {
@@ -27,48 +30,48 @@ const HowItWorksPage = () => {
     {
       icon: <Search className="h-8 w-8" />,
       title: "Browse & Discover",
-      description: "Explore thousands of unique designs from talented Kenyan artists or search for exactly what you need.",
+      description: "Explore thousands of unique designs from talented Kenyan artists with transparent commission rates.",
       gradient: "from-orange-500 to-red-500",
       details: [
         "Browse by category (T-shirts, Hoodies, Mugs, Bags)",
-        "Filter by price, rating, and artist",
+        "Filter by price, artist commission rate, and ratings",
         "Use advanced search to find specific designs",
-        "View detailed product information and reviews"
+        "View detailed product information and artist profiles"
       ]
     },
     {
       icon: <User className="h-8 w-8" />,
       title: "Choose Your Path",
-      description: "Buy a ready-made design, customize an existing one, or commission a completely new creation.",
+      description: "Multiple ways to get what you want: marketplace purchases, platform requests, or direct artist collaboration.",
       gradient: "from-red-500 to-pink-500",
       details: [
-        "Purchase ready-made designs instantly",
-        "Customize existing designs with our studio",
-        "Request custom artwork from artists",
-        "Collaborate directly with artists on your vision"
+        "Purchase ready-made designs with automatic artist commission",
+        "Submit platform requests for admin-managed quotes",
+        "Request custom artwork directly from specific artists",
+        "Negotiate pricing independently with artists"
       ]
     },
     {
-      icon: <Settings className="h-8 w-8" />,
-      title: "Personalize",
-      description: "Use our design studio to add text, change colors, or work directly with artists for custom designs.",
+      icon: <MessageCircle className="h-8 w-8" />,
+      title: "Connect & Create",
+      description: "Use our messaging system to communicate with artists or submit platform requests for custom quotes.",
       gradient: "from-pink-500 to-purple-500",
       details: [
-        "Add custom text and choose fonts",
-        "Change colors and adjust design elements",
-        "Preview your design in real-time",
-        "Save and share your customizations"
+        "Direct messaging with artists for negotiations",
+        "Platform request system for admin-managed projects",
+        "Real-time collaboration on design requirements",
+        "Secure communication and file sharing"
       ]
     },
     {
       icon: <Truck className="h-8 w-8" />,
-      title: "Receive & Enjoy",
-      description: "We handle printing and delivery. Track your order and receive your unique product within 3-5 days.",
+      title: "Print & Deliver",
+      description: "Professional printing and delivery with automatic commission tracking for artists.",
       gradient: "from-purple-500 to-orange-500",
       details: [
         "High-quality printing on premium materials",
-        "Careful packaging and quality control",
-        "Real-time order tracking",
+        "Automatic commission calculation and tracking",
+        "Real-time order tracking and updates",
         "Fast delivery across Kenya (3-5 business days)"
       ]
     }
@@ -84,19 +87,19 @@ const HowItWorksPage = () => {
     {
       step: 2,
       title: "Browse",
-      description: "Explore our marketplace",
+      description: "Explore our artist marketplace",
       icon: <Search className="h-5 w-5" />
     },
     {
       step: 3,
-      title: "Customize",
-      description: "Make it uniquely yours",
-      icon: <Palette className="h-5 w-5" />
+      title: "Choose Path",
+      description: "Marketplace, platform request, or artist direct",
+      icon: <ArrowRight className="h-5 w-5" />
     },
     {
       step: 4,
       title: "Order",
-      description: "Add to cart and checkout",
+      description: "Purchase or negotiate pricing",
       icon: <ShoppingCart className="h-5 w-5" />
     },
     {
@@ -122,59 +125,98 @@ const HowItWorksPage = () => {
     },
     {
       step: 2,
-      title: "Get Approved",
-      description: "Our team reviews your application",
-      icon: <CheckCircle className="h-5 w-5" />
+      title: "Set Commission",
+      description: "Configure your rates (min 7.7%)",
+      icon: <Percent className="h-5 w-5" />
     },
     {
       step: 3,
       title: "Upload Designs",
-      description: "Add your artwork to the marketplace",
+      description: "List your artwork in marketplace",
       icon: <Palette className="h-5 w-5" />
     },
     {
       step: 4,
-      title: "Earn Money",
-      description: "Get paid for every sale",
-      icon: <Star className="h-5 w-5" />
+      title: "Connect",
+      description: "Message with customers directly",
+      icon: <MessageCircle className="h-5 w-5" />
     },
     {
       step: 5,
-      title: "Grow",
-      description: "Build your brand and following",
-      icon: <ArrowRight className="h-5 w-5" />
+      title: "Earn",
+      description: "Automatic commission on every sale",
+      icon: <DollarSign className="h-5 w-5" />
+    }
+  ]
+
+  const pricingModels = [
+    {
+      title: "Marketplace Sales",
+      description: "Ready-made designs with standard commission",
+      icon: <ShoppingCart className="h-6 w-6 text-blue-500" />,
+      features: [
+        "Artist sets product pricing",
+        "Minimum 7.7% platform commission",
+        "Artist keeps 92.3% of sale price",
+        "Automatic commission calculation"
+      ],
+      color: "blue"
+    },
+    {
+      title: "Platform Requests",
+      description: "Admin-managed custom projects",
+      icon: <Settings className="h-6 w-6 text-green-500" />,
+      features: [
+        "Admin provides complete quote",
+        "No artist commission involved",
+        "Direct platform revenue",
+        "Professional project management"
+      ],
+      color: "green"
+    },
+    {
+      title: "Artist Direct",
+      description: "Customer-artist negotiations",
+      icon: <Users2 className="h-6 w-6 text-purple-500" />,
+      features: [
+        "Independent price negotiations",
+        "Artists set their own rates",
+        "Platform handles fulfillment only",
+        "Direct artist-customer relationships"
+      ],
+      color: "purple"
     }
   ]
 
   const features = [
     {
-      title: "Quality Guarantee",
-      description: "Premium materials and printing quality guaranteed",
-      icon: <Star className="h-6 w-6 text-yellow-500" />
+      title: "Fair Commissions",
+      description: "Artists keep 92.3% with transparent 7.7% platform fee",
+      icon: <Percent className="h-6 w-6 text-yellow-500" />
+    },
+    {
+      title: "Multiple Pricing Models",
+      description: "Marketplace, platform requests, and direct negotiations",
+      icon: <DollarSign className="h-6 w-6 text-blue-500" />
+    },
+    {
+      title: "Artist Autonomy",
+      description: "Artists control their pricing and customer relationships",
+      icon: <Star className="h-6 w-6 text-purple-500" />
     },
     {
       title: "Fast Delivery",
       description: "3-5 business days delivery across Kenya",
-      icon: <Truck className="h-6 w-6 text-blue-500" />
+      icon: <Truck className="h-6 w-6 text-green-500" />
     },
     {
-      title: "Custom Designs",
-      description: "Work directly with artists for unique creations",
-      icon: <Palette className="h-6 w-6 text-purple-500" />
-    },
-    {
-      title: "Secure Payments",
-      description: "M-Pesa and card payments with full security",
-      icon: <CreditCard className="h-6 w-6 text-green-500" />
-    },
-    {
-      title: "24/7 Support",
-      description: "Customer support whenever you need help",
+      title: "Secure Messaging",
+      description: "Built-in communication system for all interactions",
       icon: <MessageCircle className="h-6 w-6 text-orange-500" />
     },
     {
-      title: "Easy Returns",
-      description: "Hassle-free returns within 30 days",
+      title: "Quality Guarantee",
+      description: "Premium materials and printing quality guaranteed",
       icon: <CheckCircle className="h-6 w-6 text-red-500" />
     }
   ]
@@ -188,7 +230,7 @@ const HowItWorksPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-5xl font-bold mb-6">How Brandy Works</h1>
           <p className="text-xl mb-8 max-w-3xl mx-auto">
-            From inspiration to delivery, we make it simple to get custom apparel that tells your story
+            A fair marketplace that empowers Kenyan artists while giving customers multiple ways to get custom designs
           </p>
           <div className="flex justify-center gap-4">
             <Button size="lg" variant="secondary">
@@ -209,10 +251,10 @@ const HowItWorksPage = () => {
         <section className="mb-20">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              Simple Steps to Custom Apparel
+              Simple Steps, Fair Business
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our streamlined process makes it easy to get exactly what you want
+              Our streamlined process supports artists while giving customers flexible options
             </p>
           </div>
           
@@ -246,6 +288,38 @@ const HowItWorksPage = () => {
           </div>
         </section>
 
+        {/* Pricing Models */}
+        <section className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Three Ways to Work</h2>
+            <p className="text-gray-600">Different approaches for different needs</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            {pricingModels.map((model, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-3">
+                    {model.icon}
+                    {model.title}
+                  </CardTitle>
+                  <p className="text-gray-600">{model.description}</p>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {model.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-start">
+                        <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
         {/* Customer Journey */}
         <section className="mb-20">
           <div className="text-center mb-12">
@@ -255,8 +329,8 @@ const HowItWorksPage = () => {
           
           <div className="flex flex-wrap justify-center items-center gap-4">
             {customerJourney.map((item, index) => (
-              <React.Fragment key={index}>
-                <div className="flex flex-col items-center text-center">
+              <>
+                <div key={index} className="flex flex-col items-center text-center">
                   <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-2">
                     {item.icon}
                   </div>
@@ -267,7 +341,7 @@ const HowItWorksPage = () => {
                 {index < customerJourney.length - 1 && (
                   <ArrowRight className="h-5 w-5 text-gray-400 hidden sm:block" />
                 )}
-              </React.Fragment>
+              </>
             ))}
           </div>
         </section>
@@ -276,13 +350,13 @@ const HowItWorksPage = () => {
         <section className="mb-20">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">For Artists</h2>
-            <p className="text-gray-600">Join our platform and start earning from your creativity</p>
+            <p className="text-gray-600">Join our platform and start earning fair commissions</p>
           </div>
           
           <div className="flex flex-wrap justify-center items-center gap-6">
             {artistJourney.map((item, index) => (
-              <React.Fragment key={index}>
-                <div className="flex flex-col items-center text-center">
+              <>
+                <div key={index} className="flex flex-col items-center text-center">
                   <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mb-2">
                     {item.icon}
                   </div>
@@ -293,7 +367,7 @@ const HowItWorksPage = () => {
                 {index < artistJourney.length - 1 && (
                   <ArrowRight className="h-5 w-5 text-gray-400 hidden sm:block" />
                 )}
-              </React.Fragment>
+              </>
             ))}
           </div>
           
@@ -311,7 +385,7 @@ const HowItWorksPage = () => {
         <section className="mb-20">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Brandy?</h2>
-            <p className="text-gray-600">We're committed to providing the best experience for both customers and artists</p>
+            <p className="text-gray-600">Fair, transparent, and artist-focused marketplace</p>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -342,44 +416,44 @@ const HowItWorksPage = () => {
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
+                <CardTitle className="text-lg">How do artist commissions work?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Artists keep 92.3% of marketplace sales, with only 7.7% going to platform operations. For direct negotiations, artists set their own pricing.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">What's the difference between platform requests and artist direct?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Platform requests are quoted by our admin team with no artist commission. Artist direct involves negotiations between customers and artists.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Can I modify existing artist designs?</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  You need explicit permission from the artist to modify their designs. You can request customizations through our messaging system.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
                 <CardTitle className="text-lg">How long does delivery take?</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  Standard delivery takes 3-5 business days within Kenya. Express delivery options are available for faster shipping.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Can I return my order?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Yes, we offer hassle-free returns within 30 days of delivery if you're not satisfied with your order.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">How do custom designs work?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  You can either customize existing designs using our studio or request completely new artwork from our artists.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">What payment methods do you accept?</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  We accept M-Pesa, credit/debit cards, and bank transfers for your convenience.
+                  Standard delivery takes 3-5 business days within Kenya. We handle all printing and shipping professionally.
                 </p>
               </CardContent>
             </Card>
@@ -389,11 +463,11 @@ const HowItWorksPage = () => {
         {/* CTA Section */}
         <section className="text-center bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl p-12">
           <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-xl mb-8">Join thousands of satisfied customers and talented artists</p>
+          <p className="text-xl mb-8">Join a fair marketplace that values both artists and customers</p>
           <div className="flex justify-center gap-4">
             <Link to="/marketplace">
               <Button size="lg" variant="secondary">
-                Start Shopping
+                Browse Marketplace
               </Button>
             </Link>
             <Link to="/artists">
