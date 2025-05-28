@@ -189,6 +189,7 @@ ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
 CREATE POLICY "Public profiles are viewable by everyone" ON profiles FOR SELECT USING (true);
+CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Categories policies (public read)
@@ -196,6 +197,7 @@ CREATE POLICY "Categories are viewable by everyone" ON categories FOR SELECT USI
 
 -- Artist profiles policies
 CREATE POLICY "Artist profiles are viewable by everyone" ON artist_profiles FOR SELECT USING (true);
+CREATE POLICY "Artists can insert own profile" ON artist_profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Artists can update own profile" ON artist_profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Products policies

@@ -263,52 +263,69 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const signUp = async (email: string, password: string, fullName: string, role: UserRole) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          role: role,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+            role: role,
+          },
         },
-      },
-    })
+      })
 
-    if (!error && data.user) {
+      if (error) {
+        console.error('Supabase auth signup error:', error)
+        return { data, error }
+      }
+
+      if (!data.user) {
+        return { data, error: { message: 'User creation failed - no user data returned' } }
+      }
+
       try {
-        // Wait a bit for the profile to be created by the trigger
+        // Wait a bit for the database trigger to create the profile
         await new Promise(resolve => setTimeout(resolve, 1000))
 
-        // First, check if profile exists, if not create it
-        const { data: existingProfile } = await supabase
+        // Check if profile was created by the trigger
+        const { data: existingProfile, error: fetchError } = await supabase
           .from('profiles')
-          .select('id')
+          .select('id, role')
           .eq('id', data.user.id)
           .single()
 
+        console.log('Profile check result:', { existingProfile, fetchError })
+
         if (!existingProfile) {
-          // Create profile if it doesn't exist
+          console.log('Profile not created by trigger, creating manually...')
+          // Create profile manually if trigger didn't work
           const { error: insertError } = await supabase
             .from('profiles')
             .insert({
               id: data.user.id,
-              email: data.user.email,
+              email: data.user.email || email,
               full_name: fullName,
               role: role,
               is_verified: false
             })
 
           if (insertError) {
-            console.error('Error creating profile:', insertError)
+            console.error('Error creating profile manually:', insertError)
+            // Don't fail the signup, just log the error
+            console.warn('Profile creation failed, but user account was created successfully')
+          } else {
+            console.log('Profile created manually')
           }
         } else {
-          // Update existing profile with the selected role
+          console.log('Profile exists, updating if needed...')
+          // Update profile if it exists but has wrong data
           const { error: updateError } = await supabase
             .from('profiles')
             .update({
               role,
               full_name: fullName,
-              email: data.user.email
+              email: data.user.email || email
             })
             .eq('id', data.user.id)
 
@@ -317,7 +334,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
 
-        // If artist, create artist profile
+        // If artist, ensure artist profile exists
         if (role === 'artist') {
           const { error: artistError } = await supabase
             .from('artist_profiles')
@@ -332,16 +349,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               total_reviews: 0
             })
 
-          if (artistError) {
+          if (artistError && artistError.code !== '23505') { // Ignore duplicate key error
             console.error('Error creating artist profile:', artistError)
+            // Don't fail the signup, just log the error
+            console.warn('Artist profile creation failed, but user account was created successfully')
           }
         }
+
+        console.log('User signup completed successfully')
+        return { data, error: null }
+
       } catch (profileError) {
         console.error('Error setting up user profile:', profileError)
+        // Don't fail the signup completely, the user account was created
+        console.warn('Profile setup had issues, but user account was created successfully')
+        return { data, error: null }
+      }
+    } catch (generalError) {
+      console.error('General signup error:', generalError)
+      return {
+        data: null,
+        error: {
+          message: `Signup failed: ${generalError instanceof Error ? generalError.message : 'Unknown error'}`
+        }
       }
     }
-
-    return { data, error }
   }
 
   const signIn = async (email: string, password: string) => {
