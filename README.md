@@ -195,12 +195,20 @@ npm run dev
 
 ## 📚 Documentation
 
-- 📖 **[Project Overview](docs/PROJECT_OVERVIEW.md)** - Comprehensive project documentation
+### 🚀 For Developers & Testers
+- 👨‍💻 **[Developer Guide](docs/DEVELOPER_GUIDE.md)** - Comprehensive development & testing guide
+- 🧪 **[Testing Guide](docs/TESTING_GUIDE.md)** - Manual & automated testing procedures
+- 📊 **[System Status](docs/SYSTEM_STATUS.md)** - Complete system audit & health report
 - 🛠️ **[Setup Guide](docs/SETUP_GUIDE.md)** - Installation and configuration
-- 💰 **[Withdrawal System](docs/WITHDRAWAL_SYSTEM.md)** - Automated earnings and payment system
-- 📡 **[API Reference](docs/API_REFERENCE.md)** - Complete API documentation
+- 🚀 **[Netlify Deployment](docs/NETLIFY_DEPLOYMENT.md)** - Production deployment guide
+
+### 🎨 For Users & Artists
 - 🎨 **[Artist Guide](docs/ARTIST_GUIDE.md)** - How to succeed as an artist
 - ❓ **[FAQ](docs/FAQ.md)** - Frequently asked questions
+
+### 🏗️ Technical Documentation
+- 📖 **[Project Overview](docs/PROJECT_OVERVIEW.md)** - Architecture and technical details
+- 🔒 **[Security](docs/SECURITY.md)** - Security policies and reporting
 
 ## 🌟 Contributing
 

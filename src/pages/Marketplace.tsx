@@ -7,7 +7,9 @@ import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, Filter, Grid, List, User, Heart, ShoppingCart, Send, Sparkles, Palette } from 'lucide-react';
+import { Search, Filter, Grid, List, User, Heart, ShoppingCart, Send, Sparkles, Palette, Download, MessageCircle, Star, Crown } from 'lucide-react';
+import ChatModal from '@/components/ChatModal';
+import LicensePurchaseModal from '@/components/LicensePurchaseModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from '@/hooks/use-toast';
@@ -19,6 +21,10 @@ const Marketplace = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [licenseFilter, setLicenseFilter] = useState('all');
+  const [chatModalOpen, setChatModalOpen] = useState(false);
+  const [licenseModalOpen, setLicenseModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const { user } = useAuth();
   const { addToCart } = useCart();
@@ -33,8 +39,62 @@ const Marketplace = () => {
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (product.artist?.full_name || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || product.category_id === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesLicense = licenseFilter === 'all' ||
+                          (licenseFilter === 'free' && product.is_free) ||
+                          (licenseFilter === 'licensed' && !product.is_free);
+    return matchesSearch && matchesCategory && matchesLicense;
   });
+
+  const handleContactArtist = (product: any) => {
+    if (!user) {
+      toast({
+        title: 'Sign in required',
+        description: 'Please sign in to contact artists',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setSelectedProduct(product);
+    setChatModalOpen(true);
+  };
+
+  const handleLicensePurchase = (product: any) => {
+    if (!user) {
+      toast({
+        title: 'Sign in required',
+        description: 'Please sign in to purchase licenses',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setSelectedProduct(product);
+    setLicenseModalOpen(true);
+  };
+
+  const handleFreeDownload = (product: any) => {
+    if (!user) {
+      toast({
+        title: 'Sign in required',
+        description: 'Please sign in to download designs',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Simulate download
+    toast({
+      title: 'Download started',
+      description: `Downloading ${product.title}...`,
+    });
+
+    // In real app, this would trigger actual file download
+    setTimeout(() => {
+      toast({
+        title: 'Download complete',
+        description: 'Design files have been downloaded to your device',
+      });
+    }, 2000);
+  };
 
   // Insert custom request card at strategic positions
   const getProductsWithCustomCard = () => {
@@ -59,8 +119,24 @@ const Marketplace = () => {
       {/* Hero Banner */}
       <section className="bg-gradient-to-r from-orange-600 to-red-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-4">Discover Unique Designs</h1>
-          <p className="text-xl text-orange-100">Explore thousands of designs from talented Kenyan artists</p>
+          <h1 className="text-4xl font-bold mb-4">Design Marketplace</h1>
+          <p className="text-xl text-orange-100 mb-4">
+            Discover free and licensed designs from talented Kenyan artists
+          </p>
+          <div className="flex flex-wrap gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              <span>Free Downloads</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Crown className="h-4 w-4" />
+              <span>Premium Licenses</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4" />
+              <span>Print Services</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -93,6 +169,17 @@ const Marketplace = () => {
                   {category.name}
                 </option>
               ))}
+            </select>
+
+            <select
+              value={licenseFilter}
+              onChange={(e) => setLicenseFilter(e.target.value)}
+              className="px-4 py-3 border rounded-lg min-h-[48px] text-base"
+              style={{ fontSize: '16px' }}
+            >
+              <option value="all">All Licenses</option>
+              <option value="free">Free Designs</option>
+              <option value="licensed">Licensed Designs</option>
             </select>
 
             <Button variant="outline" size="sm" className="min-h-[48px] text-sm sm:text-base">
@@ -182,7 +269,7 @@ const Marketplace = () => {
                       </div>
 
                       {/* Action Button */}
-                      <Link to="/custom-studio" className="block">
+                      <Link to="/request-quote" className="block">
                         <Button
                           size="sm"
                           className={`${styles.customButton} ${styles.touchButton}`}
@@ -194,7 +281,7 @@ const Marketplace = () => {
                           }}
                         >
                           <Send className="h-4 w-4 mr-2" />
-                          Get Custom Design
+                          Request Quote
                         </Button>
                       </Link>
                     </div>
@@ -203,11 +290,25 @@ const Marketplace = () => {
               ) : (
               <Link key={product.id} to={`/product/${product.id}`} className={`block ${styles.productLink}`}>
                 <div className={`bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow relative ${styles.productCard}`}>
-                  {product.is_featured && (
-                    <Badge className="absolute top-3 left-3 z-10 bg-yellow-500">
-                      Featured
-                    </Badge>
-                  )}
+                  <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
+                    {product.is_featured && (
+                      <Badge className="bg-yellow-500">
+                        <Star className="h-3 w-3 mr-1" />
+                        Featured
+                      </Badge>
+                    )}
+                    {product.is_free ? (
+                      <Badge className="bg-green-500">
+                        <Download className="h-3 w-3 mr-1" />
+                        Free
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-purple-500">
+                        <Crown className="h-3 w-3 mr-1" />
+                        Licensed
+                      </Badge>
+                    )}
+                  </div>
 
                   <div className="aspect-square bg-gray-200 rounded-t-lg relative overflow-hidden">
                     <img
@@ -297,76 +398,96 @@ const Marketplace = () => {
                     </div>
 
                     <div className="flex items-center justify-between mb-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                        <span className="text-base sm:text-lg font-bold text-purple-600">KSh {product.price.toLocaleString()}</span>
-                        {product.original_price && product.original_price > product.price && (
-                          <span className="text-xs sm:text-sm text-gray-500 line-through">KSh {product.original_price.toLocaleString()}</span>
+                      <div className="flex flex-col gap-1">
+                        {product.is_free ? (
+                          <div>
+                            <span className="text-base sm:text-lg font-bold text-green-600">FREE</span>
+                            <div className="text-xs text-gray-500">License included</div>
+                          </div>
+                        ) : (
+                          <div>
+                            <span className="text-base sm:text-lg font-bold text-purple-600">
+                              KSh {(product.license_price || product.price).toLocaleString()}
+                            </span>
+                            <div className="text-xs text-gray-500">
+                              {product.license_type?.charAt(0).toUpperCase() + product.license_type?.slice(1)} License
+                            </div>
+                          </div>
                         )}
                       </div>
-                      <span className={`text-xs sm:text-sm ${product.stock_quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {product.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'}
-                      </span>
+                      <div className="text-right">
+                        <div className="flex items-center text-xs text-gray-600 mb-1">
+                          <Star className="h-3 w-3 text-yellow-500 mr-1" />
+                          <span>{product.artist?.rating || 4.5}</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {product.artist?.total_sales || 0} sales
+                        </div>
+                      </div>
                     </div>
 
                     <div className={`${styles.actionButtons} ${styles.buttonContainer}`}>
-                      <Button
-                        className={`flex-1 ${styles.primaryButton} ${styles.touchButton}`}
-                        size="sm"
-                        disabled={product.stock_quantity === 0}
-                        onClick={async (e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (!user) {
-                            toast({
-                              title: 'Sign in required',
-                              description: 'Please sign in to add items to cart',
-                              variant: 'destructive',
-                            });
-                            return;
-                          }
-
-                          try {
-                            await addToCart(product.id, 1);
-                            toast({
-                              title: 'Added to cart',
-                              description: `${product.title} added to your cart`,
-                            });
-                          } catch (error) {
-                            toast({
-                              title: 'Error',
-                              description: 'Failed to add item to cart',
-                              variant: 'destructive',
-                            });
-                          }
-                        }}
-                        onTouchStart={(e) => {
-                          e.stopPropagation();
-                        }}
-                        onTouchEnd={(e) => {
-                          e.stopPropagation();
-                        }}
-                      >
-                        <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                        <span className="text-xs sm:text-sm">Add to Cart</span>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className={`flex-1 ${styles.secondaryButton} ${styles.touchButton}`}
-                        size="sm"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          window.location.href = `/custom-studio?product=${product.id}`;
-                        }}
-                        onTouchStart={(e) => {
-                          e.stopPropagation();
-                        }}
-                        onTouchEnd={(e) => {
-                          e.stopPropagation();
-                        }}
-                      >
-                        <span className="text-xs sm:text-sm">Customize</span>
-                      </Button>
+                      {product.is_free ? (
+                        <>
+                          <Button
+                            className={`flex-1 ${styles.primaryButton} ${styles.touchButton} bg-green-600 hover:bg-green-700`}
+                            size="sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleFreeDownload(product);
+                            }}
+                            onTouchStart={(e) => e.stopPropagation()}
+                          >
+                            <Download className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            <span className="text-xs sm:text-sm">Free Download</span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className={`flex-1 ${styles.secondaryButton} ${styles.touchButton}`}
+                            size="sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              window.location.href = `/custom-studio?design=${product.id}`;
+                            }}
+                            onTouchStart={(e) => e.stopPropagation()}
+                          >
+                            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span className="text-xs sm:text-sm">Print</span>
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            className={`flex-1 ${styles.primaryButton} ${styles.touchButton}`}
+                            size="sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleContactArtist(product);
+                            }}
+                            onTouchStart={(e) => e.stopPropagation()}
+                          >
+                            <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            <span className="text-xs sm:text-sm">Contact Artist</span>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className={`flex-1 ${styles.secondaryButton} ${styles.touchButton}`}
+                            size="sm"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleLicensePurchase(product);
+                            }}
+                            onTouchStart={(e) => e.stopPropagation()}
+                          >
+                            <Crown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span className="text-xs sm:text-sm">License</span>
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -383,6 +504,39 @@ const Marketplace = () => {
       </div>
 
       <Footer />
+
+      {/* Chat Modal */}
+      {selectedProduct && (
+        <ChatModal
+          isOpen={chatModalOpen}
+          onClose={() => {
+            setChatModalOpen(false);
+            setSelectedProduct(null);
+          }}
+          artist={{
+            id: selectedProduct.artist_id,
+            full_name: selectedProduct.artist?.full_name || 'Unknown Artist',
+            avatar_url: selectedProduct.artist?.avatar_url,
+            role: 'artist',
+            rating: selectedProduct.artist?.rating,
+            total_sales: selectedProduct.artist?.total_sales
+          }}
+          productTitle={selectedProduct.title}
+          productId={selectedProduct.id}
+        />
+      )}
+
+      {/* License Purchase Modal */}
+      {selectedProduct && (
+        <LicensePurchaseModal
+          isOpen={licenseModalOpen}
+          onClose={() => {
+            setLicenseModalOpen(false);
+            setSelectedProduct(null);
+          }}
+          product={selectedProduct}
+        />
+      )}
     </div>
   );
 };

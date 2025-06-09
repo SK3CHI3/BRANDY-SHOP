@@ -1,0 +1,14 @@
+# Netlify _redirects file for BRANDY-SHOP React SPA
+# This file handles client-side routing and prevents 404 errors
+
+# API redirects (if any external APIs need proxying)
+/api/*  https://xrqfckeuzzgnwkutxqkx.supabase.co/rest/v1/:splat  200
+/auth/* https://xrqfckeuzzgnwkutxqkx.supabase.co/auth/v1/:splat  200
+
+# Security headers for sensitive routes
+/admin-panel/*  /index.html  200
+/admin/*        /index.html  200
+
+# Handle all other routes - SPA fallback
+# This must be the last rule as it catches all unmatched routes
+/*    /index.html   200

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { User, Search, Settings, LogOut, Palette, ShoppingBag, Shield, ShoppingCart, Menu, X, Heart, MessageCircle, Package, Bell, DollarSign } from 'lucide-react';
+import { User, Search, Settings, LogOut, Palette, ShoppingBag, Shield, ShoppingCart, Menu, X, Heart, MessageCircle, Package, Bell, DollarSign, FileImage } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
@@ -215,6 +215,7 @@ const Header = () => {
               >
                 Artists
               </Link>
+
               <Link
                 to="/how-it-works"
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -329,6 +330,14 @@ const Header = () => {
                       <span>Notifications</span>
                     </Link>
                   </DropdownMenuItem>
+                  {(profile.role === 'customer' || profile.role === 'artist') && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/my-licenses">
+                        <FileImage className="mr-2 h-4 w-4" />
+                        <span>My Licenses</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   {profile.role === 'artist' && (
                     <>
@@ -474,6 +483,7 @@ const Header = () => {
                   <User className="h-5 w-5 mr-3" />
                   Artists
                 </Link>
+
                 <Link
                   to="/how-it-works"
                   className={`block px-6 py-4 text-base font-medium min-h-[48px] flex items-center ${styles.menuItem}`}

@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://xrqfckeuzzgnwkutxqkx.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhycWZja2V1enpnbndrdXR4cWt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgyOTQ5MDUsImV4cCI6MjA2Mzg3MDkwNX0.QGEZZ2lkSc7J6BEY_Vub1FxxmX8sSkqdG50aCJq0R6Q'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
@@ -77,15 +77,21 @@ export interface Product {
   price: number
   original_price?: number
   image_url?: string
+  watermarked_url?: string
+  high_res_url?: string
   images: string[]
   tags: string[]
   is_featured: boolean
   is_active: boolean
+  is_free: boolean
+  license_type?: 'free' | 'standard' | 'exclusive' | 'commercial'
+  license_price?: number
+  usage_rights?: string
   stock_quantity: number
   created_at: string
   updated_at: string
   // Relations
-  artist?: Profile
+  artist?: Profile & { rating?: number; total_sales?: number }
   category?: Category
 }
 

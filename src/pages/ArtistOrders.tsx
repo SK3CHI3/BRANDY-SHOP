@@ -143,7 +143,7 @@ const ArtistOrders = () => {
     {
       id: '1',
       title: 'Kenyan Wildlife T-Shirt',
-      image: '/placeholder.svg',
+      image: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=300&h=300&fit=crop&crop=center',
       totalOrders: 25,
       totalRevenue: 37500,
       totalCommission: 5625,
@@ -155,7 +155,7 @@ const ArtistOrders = () => {
     {
       id: '2',
       title: 'Traditional Patterns Hoodie',
-      image: '/placeholder.svg',
+      image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=300&fit=crop&crop=center',
       totalOrders: 18,
       totalRevenue: 45000,
       totalCommission: 6750,

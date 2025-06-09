@@ -69,12 +69,13 @@ const About = () => {
     }
   ]
 
+  const currentYear = new Date().getFullYear()
   const milestones = [
     { year: '2020', event: 'Brandy Shop founded with 10 local artists' },
     { year: '2021', event: 'Reached 100 artists and launched custom design studio' },
     { year: '2022', event: 'Expanded to serve customers across East Africa' },
     { year: '2023', event: 'Launched international shipping and artist mentorship program' },
-    { year: '2024', event: 'Celebrating 500+ artists and 10,000+ designs created' }
+    { year: currentYear.toString(), event: `Celebrating 500+ artists and 10,000+ designs created` }
   ]
 
   return (

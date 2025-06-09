@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer'
-import AdminWithdrawals from '@/components/AdminWithdrawals';
+
+import PromoteProductModal from '@/components/PromoteProductModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Palette, ShoppingBag, Shield, User, Settings, BarChart3, Package, Users, Star, Heart, TrendingUp, Eye } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { Palette, ShoppingBag, Shield, User, Settings, BarChart3, Package, Users, Star, Heart, TrendingUp, Eye, Zap } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
@@ -36,6 +38,8 @@ const Dashboard = () => {
     recentFavoriteProducts: []
   });
   const [loading, setLoading] = useState(true);
+  const [promoteModalOpen, setPromoteModalOpen] = useState(false);
+  const [selectedProductToPromote, setSelectedProductToPromote] = useState<any>(null);
 
   // Fetch dashboard data
   useEffect(() => {
@@ -423,7 +427,15 @@ const Dashboard = () => {
                           className="w-12 h-12 object-cover rounded-lg"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 truncate">{product.title}</p>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-gray-900 truncate">{product.title}</p>
+                            {product.is_featured && (
+                              <Badge className="bg-yellow-100 text-yellow-800 text-xs">
+                                <Star className="h-3 w-3 mr-1" />
+                                Featured
+                              </Badge>
+                            )}
+                          </div>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
                             <span>KSh {product.price?.toLocaleString()}</span>
                             <span>•</span>
@@ -433,6 +445,18 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
+                          onClick={() => {
+                            setSelectedProductToPromote(product);
+                            setPromoteModalOpen(true);
+                          }}
+                        >
+                          <Zap className="h-3 w-3 mr-1" />
+                          Promote
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -648,7 +672,24 @@ const Dashboard = () => {
         {/* Admin-specific sections */}
         {profile.role === 'admin' && (
           <div className="mb-8">
-            <AdminWithdrawals />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Payment System Info
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-6">
+                  <Shield className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Direct Payment Model</h3>
+                  <p className="text-gray-600">
+                    BRANDY-SHOP uses a direct payment system where artists receive payments directly from customers.
+                    No withdrawal management needed!
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         )}
 
@@ -681,11 +722,30 @@ const Dashboard = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    className="h-16 sm:h-20 flex flex-col gap-1 sm:gap-2 hover:bg-green-50 hover:border-green-200 text-xs sm:text-sm sm:col-span-2 lg:col-span-1"
+                    className="h-16 sm:h-20 flex flex-col gap-1 sm:gap-2 hover:bg-green-50 hover:border-green-200 text-xs sm:text-sm"
                     onClick={() => navigate('/artist-studio')}
                   >
                     <Package className="h-4 w-4 sm:h-6 sm:w-6" />
                     Manage Studio
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-16 sm:h-20 flex flex-col gap-1 sm:gap-2 hover:bg-yellow-50 hover:border-yellow-200 text-xs sm:text-sm"
+                    onClick={() => {
+                      if (dashboardData.recentProducts.length > 0) {
+                        setSelectedProductToPromote(dashboardData.recentProducts[0]);
+                        setPromoteModalOpen(true);
+                      } else {
+                        toast({
+                          title: 'No products to promote',
+                          description: 'Upload a design first to promote it',
+                          variant: 'destructive'
+                        });
+                      }
+                    }}
+                  >
+                    <Zap className="h-4 w-4 sm:h-6 sm:w-6" />
+                    Promote Design
                   </Button>
                 </>
               )}
@@ -751,6 +811,18 @@ const Dashboard = () => {
       </div>
 
       <Footer />
+
+      {/* Promote Product Modal */}
+      {selectedProductToPromote && (
+        <PromoteProductModal
+          isOpen={promoteModalOpen}
+          onClose={() => {
+            setPromoteModalOpen(false);
+            setSelectedProductToPromote(null);
+          }}
+          product={selectedProductToPromote}
+        />
+      )}
     </div>
   );
 };

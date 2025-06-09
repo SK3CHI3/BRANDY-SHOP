@@ -5,7 +5,7 @@ import { useData } from '@/contexts/DataContext'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import MobileTestSuite from '@/components/MobileTestSuite'
-import WithdrawalModal from '@/components/WithdrawalModal'
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -292,28 +292,27 @@ const MobileTestPage = () => {
             </CardContent>
           </Card>
 
-          {/* Withdrawal Testing (Artists Only) */}
+          {/* Direct Payment Info (Artists Only) */}
           {user?.role === 'artist' && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Wallet className="h-5 w-5" />
-                  Withdrawal System Test
+                  Direct Payment System
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <WithdrawalModal
-                  trigger={
-                    <Button className="w-full min-h-[48px] bg-green-600 hover:bg-green-700">
-                      <Wallet className="h-4 w-4 mr-2" />
-                      Test Withdrawal Request
-                    </Button>
-                  }
-                />
+                <Button
+                  className="w-full min-h-[48px] bg-green-600 hover:bg-green-700"
+                  onClick={() => window.open('https://wa.me/254714525667?text=Hello! I need information about the direct payment system.', '_blank')}
+                >
+                  <Wallet className="h-4 w-4 mr-2" />
+                  Contact for Payment Info
+                </Button>
 
                 <Alert>
                   <AlertDescription>
-                    Tests mobile-optimized withdrawal request form
+                    Artists receive payments directly from customers - no withdrawal system needed!
                   </AlertDescription>
                 </Alert>
               </CardContent>

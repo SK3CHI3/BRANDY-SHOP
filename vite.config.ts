@@ -30,9 +30,22 @@ export default defineConfig(({ mode }) => ({
     include: ['react', 'react-dom', '@supabase/supabase-js'],
     exclude: ['@vite/client', '@vite/env']
   },
-  // Reduce bundle analysis overhead in development
+  // Optimize build for production
   build: {
     sourcemap: mode === 'development' ? false : true,
-    minify: mode === 'development' ? false : 'esbuild'
+    minify: mode === 'development' ? false : 'esbuild',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          supabase: ['@supabase/supabase-js']
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000,
+    assetsDir: 'assets',
+    outDir: 'dist'
   }
 }));

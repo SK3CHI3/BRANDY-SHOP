@@ -5,8 +5,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
-import WithdrawalModal from '@/components/WithdrawalModal'
-import WithdrawalHistory from '@/components/WithdrawalHistory'
+
 import CommissionDashboard from '@/components/CommissionDashboard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -375,15 +374,14 @@ const ArtistStudio = () => {
                   <BarChart3 className="h-6 w-6 text-green-600" />
                 </div>
               </div>
-              <WithdrawalModal
-                trigger={
-                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white min-h-[48px]">
-                    <Wallet className="h-4 w-4 mr-2" />
-                    <span className="hidden sm:inline">Request Withdrawal</span>
-                    <span className="sm:hidden">Withdraw</span>
-                  </Button>
-                }
-              />
+              <Button
+                className="w-full bg-green-600 hover:bg-green-700 text-white min-h-[48px]"
+                onClick={() => window.open('https://wa.me/254714525667?text=Hello! I would like to discuss my earnings and payment options.', '_blank')}
+              >
+                <Wallet className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Contact for Payment</span>
+                <span className="sm:hidden">Payment</span>
+              </Button>
             </CardContent>
           </Card>
 
@@ -721,7 +719,29 @@ const ArtistStudio = () => {
           </TabsContent>
 
           <TabsContent value="earnings" className="space-y-6">
-            <WithdrawalHistory />
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Earnings Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Direct Payment System</h3>
+                  <p className="text-gray-600 mb-4">
+                    Artists receive payments directly from customers. No withdrawal system needed!
+                  </p>
+                  <Button
+                    onClick={() => window.open('https://wa.me/254714525667?text=Hello! I would like to discuss my earnings and payment tracking.', '_blank')}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    Contact Support for Payment Info
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="orders" className="space-y-6">

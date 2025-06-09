@@ -3,35 +3,44 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useData } from '@/contexts/DataContext';
-import { ArrowRight, Sparkles, Palette, Users, Star, Heart, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
+import { ArrowRight, Sparkles, Palette, Users, Star, Heart, ChevronLeft, ChevronRight, Play, Pause, Shield, Zap, Download } from 'lucide-react';
 
 
 const HeroSection = () => {
-  const { stats, statsLoading, featuredProducts, featuredLoading } = useData();
+  const { stats, statsLoading } = useData();
 
   // Carousel state management
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
 
-  // Create showcase items (featured products + custom design option)
+  // Create showcase items (feature cards)
   const showcaseItems = React.useMemo(() => {
     const items = [];
 
-    // Add featured products
-    if (featuredProducts.length > 0) {
-      items.push(...featuredProducts.slice(0, 3).map(product => ({
-        type: 'product',
-        data: product,
-        title: product.title,
-        subtitle: `by ${product.artist?.full_name || 'Artist'}`,
-        price: `KSh ${product.price.toLocaleString()}`,
-        image: product.image_url,
-        link: `/product/${product.id}`,
-        badge: 'Featured Design',
-        gradient: 'from-orange-500 via-red-500 to-pink-500'
-      })));
-    }
+    // Add quality assurance feature
+    items.push({
+      type: 'feature',
+      title: 'Premium Quality',
+      subtitle: 'Professional printing & materials',
+      price: 'Guaranteed Excellence',
+      link: '/marketplace',
+      badge: 'Quality First',
+      gradient: 'from-blue-500 via-indigo-500 to-purple-500',
+      icon: 'shield'
+    });
+
+    // Add fast delivery feature
+    items.push({
+      type: 'feature',
+      title: 'Lightning Fast',
+      subtitle: 'Quick turnaround & delivery',
+      price: '2-5 Days Delivery',
+      link: '/marketplace',
+      badge: 'Speed & Efficiency',
+      gradient: 'from-yellow-500 via-orange-500 to-red-500',
+      icon: 'zap'
+    });
 
     // Add custom design option
     items.push({
@@ -39,9 +48,10 @@ const HeroSection = () => {
       title: 'Custom Design Studio',
       subtitle: 'Work directly with talented artists',
       price: 'From KSh 2,000',
-      link: '/custom-studio',
+      link: '/request-quote',
       badge: 'Create Your Own',
-      gradient: 'from-purple-500 via-indigo-500 to-blue-500'
+      gradient: 'from-purple-500 via-indigo-500 to-blue-500',
+      icon: 'palette'
     });
 
     // Add marketplace promotion
@@ -52,11 +62,12 @@ const HeroSection = () => {
       price: 'Starting KSh 800',
       link: '/marketplace',
       badge: 'Browse All',
-      gradient: 'from-green-500 via-teal-500 to-cyan-500'
+      gradient: 'from-green-500 via-teal-500 to-cyan-500',
+      icon: 'sparkles'
     });
 
     return items;
-  }, [featuredProducts]);
+  }, []);
 
   // Auto-scroll functionality
   useEffect(() => {
@@ -145,9 +156,9 @@ const HeroSection = () => {
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                 </Button>
               </Link>
-              <Link to="/custom-studio" className="w-full sm:w-auto">
+              <Link to="/request-quote" className="w-full sm:w-auto">
                 <Button variant="outline" size="lg" className="text-sm sm:text-base lg:text-lg px-4 sm:px-6 lg:px-8 py-3 sm:py-4 lg:py-5 border-2 border-orange-300 text-orange-700 hover:bg-orange-50 hover:border-orange-400 transition-all duration-300 w-full min-h-[48px]">
-                  Start Creating
+                  Request Quote
                   <Palette className="ml-2 h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6" />
                 </Button>
               </Link>
@@ -168,7 +179,7 @@ const HeroSection = () => {
               </div>
               <div className="text-center">
                 <div className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold text-gray-700">
-                  {statsLoading ? '...' : stats.orderCount > 0 ? `${stats.orderCount}+` : '100+'}
+                  {statsLoading ? '...' : stats.orderCount > 0 ? `${stats.orderCount}+` : '2+'}
                 </div>
                 <div className="text-xs sm:text-sm lg:text-base text-gray-500 font-medium">Orders Completed</div>
               </div>
@@ -223,20 +234,12 @@ const HeroSection = () => {
                     border: '1px solid rgba(255,255,255,0.2)'
                   }}
                 >
-                  {featuredLoading ? (
-                    // Loading skeleton
-                    <div className="bg-gradient-to-br from-gray-100 to-gray-200 aspect-[16/10] animate-pulse">
-                      <div className="h-full flex items-center justify-center">
-                        <div className="w-16 h-16 bg-gray-300 rounded-xl animate-pulse"></div>
-                      </div>
-                    </div>
-                  ) : (
-                    // Showcase carousel with single full-sized cards
-                    <div className="relative">
-                      <div
-                        className="flex transition-transform duration-700 ease-in-out"
-                        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-                      >
+                  {/* Showcase carousel with single full-sized cards */}
+                  <div className="relative">
+                    <div
+                      className="flex transition-transform duration-700 ease-in-out"
+                      style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                    >
                         {showcaseItems.map((item, index) => (
                           <div key={index} className="w-full flex-shrink-0">
                             <Link to={item.link} className="block group">
@@ -302,8 +305,8 @@ const HeroSection = () => {
                                       }}
                                     >
                                       <span className="truncate">
-                                        {item.type === 'product' ? 'View Design' :
-                                         item.type === 'custom' ? 'Start Creating' : 'Browse All'}
+                                        {item.type === 'feature' ? 'Learn More' :
+                                         item.type === 'custom' ? 'Request Quote' : 'Browse All'}
                                       </span>
                                       <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 flex-shrink-0" />
                                     </Button>
@@ -312,37 +315,25 @@ const HeroSection = () => {
                                   {/* Right Visual */}
                                   <div className="flex-shrink-0 ml-2 sm:ml-3 lg:ml-4 flex justify-center items-center">
                                     <div className="relative">
-                                      {item.type === 'product' && item.image ? (
-                                        <div
-                                          className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 xl:w-40 xl:h-40 overflow-hidden transform group-hover:scale-105 transition-transform duration-500"
-                                          style={{
-                                            borderRadius: '12px',
-                                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)'
-                                          }}
-                                        >
-                                          <img
-                                            src={item.image}
-                                            alt={item.title}
-                                            className="w-full h-full object-cover"
-                                          />
-                                        </div>
-                                      ) : (
-                                        <div
-                                          className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 xl:w-40 xl:h-40 backdrop-blur-sm flex items-center justify-center transform group-hover:scale-105 transition-transform duration-500"
-                                          style={{
-                                            background: 'rgba(255, 255, 255, 0.15)',
-                                            borderRadius: '12px',
-                                            border: '1px solid rgba(255, 255, 255, 0.2)',
-                                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-                                          }}
-                                        >
-                                          {item.type === 'custom' ? (
-                                            <Palette className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 lg:h-12 lg:w-12 xl:h-16 xl:w-16 text-white drop-shadow-lg" />
-                                          ) : (
-                                            <Sparkles className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 lg:h-12 lg:w-12 xl:h-16 xl:w-16 text-white drop-shadow-lg" />
-                                          )}
-                                        </div>
-                                      )}
+                                      <div
+                                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-32 lg:h-32 xl:w-40 xl:h-40 backdrop-blur-sm flex items-center justify-center transform group-hover:scale-105 transition-transform duration-500"
+                                        style={{
+                                          background: 'rgba(255, 255, 255, 0.15)',
+                                          borderRadius: '12px',
+                                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                                          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                                        }}
+                                      >
+                                        {item.icon === 'shield' ? (
+                                          <Shield className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 lg:h-12 lg:w-12 xl:h-16 xl:w-16 text-white drop-shadow-lg" />
+                                        ) : item.icon === 'zap' ? (
+                                          <Zap className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 lg:h-12 lg:w-12 xl:h-16 xl:w-16 text-white drop-shadow-lg" />
+                                        ) : item.icon === 'palette' ? (
+                                          <Palette className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 lg:h-12 lg:w-12 xl:h-16 xl:w-16 text-white drop-shadow-lg" />
+                                        ) : (
+                                          <Sparkles className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8 lg:h-12 lg:w-12 xl:h-16 xl:w-16 text-white drop-shadow-lg" />
+                                        )}
+                                      </div>
 
                                       {/* Floating elements - only show on larger screens */}
                                       <div
@@ -373,7 +364,6 @@ const HeroSection = () => {
                         ))}
                       </div>
                     </div>
-                  )}
 
                 </div>
 

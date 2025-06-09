@@ -159,6 +159,23 @@ CREATE TABLE IF NOT EXISTS order_tracking (
   timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Create featured_listings table for paid promotions
+CREATE TABLE IF NOT EXISTS featured_listings (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id UUID REFERENCES products(id) ON DELETE CASCADE,
+  artist_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  payment_amount DECIMAL(10,2) NOT NULL,
+  payment_method VARCHAR(50) NOT NULL,
+  payment_status VARCHAR(50) DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
+  transaction_id VARCHAR(255),
+  featured_from TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  featured_until TIMESTAMP WITH TIME ZONE NOT NULL,
+  is_active BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(product_id, featured_from, featured_until)
+);
+
 -- Create messages table
 CREATE TABLE IF NOT EXISTS messages (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,

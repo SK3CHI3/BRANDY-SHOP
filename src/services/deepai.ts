@@ -19,6 +19,10 @@ interface AIGenerationRequest {
   style?: string;
   colors?: string[];
   complexity?: 'simple' | 'medium' | 'complex';
+  width?: string;
+  height?: string;
+  imageGeneratorVersion?: 'standard' | 'hd' | 'genius';
+  negativePrompt?: string;
 }
 
 interface AIGenerationResponse {
@@ -35,7 +39,7 @@ class DeepAIService {
 
   constructor() {
     this.config = {
-      apiKey: import.meta.env.VITE_DEEPAI_API_KEY || '2f4d1478-155b-49d3-83be-42394d1a1152',
+      apiKey: import.meta.env.VITE_DEEPAI_API_KEY || '',
       baseUrl: 'https://api.deepai.org/api'
     };
 
@@ -160,10 +164,24 @@ class DeepAIService {
       const formData = new FormData();
       formData.append('text', enhancedPrompt);
 
+      // Add optional parameters
+      if (request.width) {
+        formData.append('width', request.width);
+      }
+      if (request.height) {
+        formData.append('height', request.height);
+      }
+      if (request.imageGeneratorVersion) {
+        formData.append('image_generator_version', request.imageGeneratorVersion);
+      }
+      if (request.negativePrompt) {
+        formData.append('negative_prompt', request.negativePrompt);
+      }
+
       const response = await fetch(`${this.config.baseUrl}/text2img`, {
         method: 'POST',
         headers: {
-          'Api-Key': this.config.apiKey,
+          'api-key': this.config.apiKey,
         },
         body: formData
       });

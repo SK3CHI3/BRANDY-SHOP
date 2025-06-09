@@ -7,10 +7,46 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
 dist
 dist-ssr
 *.local
+
+# Environment variables (SECURITY CRITICAL)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+
+# API Keys and Secrets (SECURITY CRITICAL)
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.json
+config/secrets.js
+config/production.js
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Build outputs
+build/
+out/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+
+# Testing
+coverage/
+.nyc_output/
+.jest/
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +58,30 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+.tmp/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Package manager files
+package-lock.json.bak
+yarn.lock.bak
+
+# Netlify
+.netlify/
+
+# Supabase
+.supabase/

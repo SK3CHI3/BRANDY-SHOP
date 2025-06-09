@@ -35,98 +35,160 @@ const getMockProducts = (filters?: { category?: string; artist?: string; feature
   const mockProducts: Product[] = [
     {
       id: '1',
-      title: 'Kenyan Wildlife Safari T-Shirt',
-      description: 'Beautiful wildlife design featuring Kenyan animals',
-      price: 1500,
-      image_url: '/placeholder.svg',
-      images: ['/placeholder.svg'],
+      title: 'Kenyan Wildlife Safari Design',
+      description: 'Beautiful wildlife design featuring Kenyan animals - Available for free use',
+      price: 0,
+      image_url: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=500&h=500&fit=crop&crop=center',
+      watermarked_url: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=500&h=500&fit=crop&crop=center&blend=000000&sat=-100&exp=15&balph=50',
+      high_res_url: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1200&h=1200&fit=crop&crop=center',
+      images: ['https://images.unsplash.com/photo-1516426122078-c23e76319801?w=500&h=500&fit=crop&crop=center'],
       category_id: '1',
       artist_id: 'mock-artist-1',
       is_active: true,
       is_featured: true,
+      is_free: true,
+      license_type: 'free',
+      usage_rights: 'Free for personal and commercial use with attribution',
       stock_quantity: 50,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       artist: {
         id: 'mock-artist-1',
         full_name: 'Sarah Wanjiku',
-        avatar_url: '/placeholder.svg'
+        avatar_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+        rating: 4.8,
+        total_sales: 45
       },
       category: {
         id: '1',
-        name: 'T-Shirts'
+        name: 'Wildlife'
       }
     },
     {
       id: '2',
-      title: 'Traditional Maasai Patterns Hoodie',
-      description: 'Authentic Maasai patterns on comfortable hoodie',
-      price: 2500,
-      image_url: '/placeholder.svg',
-      images: ['/placeholder.svg'],
+      title: 'Traditional Maasai Patterns',
+      description: 'Authentic Maasai patterns - Premium licensed design',
+      price: 1200,
+      license_price: 800,
+      image_url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=500&fit=crop&crop=center',
+      watermarked_url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=500&fit=crop&crop=center&blend=000000&sat=-100&exp=15&balph=50',
+      high_res_url: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1200&h=1200&fit=crop&crop=center',
+      images: ['https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=500&fit=crop&crop=center'],
       category_id: '2',
       artist_id: 'mock-artist-2',
       is_active: true,
       is_featured: true,
+      is_free: false,
+      license_type: 'standard',
+      usage_rights: 'Standard license for personal and commercial use',
       stock_quantity: 30,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       artist: {
         id: 'mock-artist-2',
         full_name: 'John Mwangi',
-        avatar_url: '/placeholder.svg'
+        avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+        rating: 4.6,
+        total_sales: 32
       },
       category: {
         id: '2',
-        name: 'Hoodies'
+        name: 'Traditional'
       }
     },
     {
       id: '3',
-      title: 'Nairobi Skyline Coffee Mug',
-      description: 'Beautiful Nairobi skyline design',
-      price: 800,
-      image_url: '/placeholder.svg',
-      images: ['/placeholder.svg'],
+      title: 'Nairobi Skyline Silhouette',
+      description: 'Beautiful Nairobi skyline design - Exclusive license available',
+      price: 2500,
+      license_price: 1500,
+      image_url: 'https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=500&h=500&fit=crop&crop=center',
+      watermarked_url: 'https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=500&h=500&fit=crop&crop=center&blend=000000&sat=-100&exp=15&balph=50',
+      high_res_url: 'https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=1200&h=1200&fit=crop&crop=center',
+      images: ['https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=500&h=500&fit=crop&crop=center'],
       category_id: '3',
       artist_id: 'mock-artist-1',
       is_active: true,
       is_featured: false,
+      is_free: false,
+      license_type: 'exclusive',
+      usage_rights: 'Exclusive license - you get sole usage rights',
       stock_quantity: 100,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       artist: {
         id: 'mock-artist-1',
         full_name: 'Sarah Wanjiku',
-        avatar_url: '/placeholder.svg'
+        avatar_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+        rating: 4.8,
+        total_sales: 45
       },
       category: {
         id: '3',
-        name: 'Mugs'
+        name: 'Modern'
       }
     },
     {
       id: '4',
-      title: 'Kikuyu Proverbs Canvas Tote',
-      description: 'Traditional Kikuyu wisdom on a stylish tote bag',
-      price: 1200,
-      image_url: '/placeholder.svg',
-      images: ['/placeholder.svg'],
+      title: 'Kikuyu Proverbs Typography',
+      description: 'Traditional Kikuyu wisdom in beautiful typography - Commercial license',
+      price: 1800,
+      license_price: 1200,
+      image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop&crop=center',
+      watermarked_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop&crop=center&blend=000000&sat=-100&exp=15&balph=50',
+      high_res_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=1200&fit=crop&crop=center',
+      images: ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop&crop=center'],
       category_id: '4',
       artist_id: 'mock-artist-3',
       is_active: true,
       is_featured: false,
+      is_free: false,
+      license_type: 'commercial',
+      usage_rights: 'Commercial license with full usage rights for business',
       stock_quantity: 75,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       artist: {
         id: 'mock-artist-3',
         full_name: 'Grace Njeri',
-        avatar_url: '/placeholder.svg'
+        avatar_url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+        rating: 4.7,
+        total_sales: 39
       },
       category: {
         id: '4',
-        name: 'Bags'
+        name: 'Typography'
+      }
+    },
+    {
+      id: '5',
+      title: 'Swahili Wisdom Quotes',
+      description: 'Beautiful Swahili quotes and sayings - Free for community use',
+      price: 0,
+      image_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&h=500&fit=crop&crop=center',
+      watermarked_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&h=500&fit=crop&crop=center&blend=000000&sat=-100&exp=15&balph=50',
+      high_res_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=1200&h=1200&fit=crop&crop=center',
+      images: ['https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&h=500&fit=crop&crop=center'],
+      category_id: '5',
+      artist_id: 'mock-artist-4',
+      is_active: true,
+      is_featured: true,
+      is_free: true,
+      license_type: 'free',
+      usage_rights: 'Free for personal and commercial use with attribution',
+      stock_quantity: 100,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      artist: {
+        id: 'mock-artist-4',
+        full_name: 'Amina Hassan',
+        avatar_url: 'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=150&h=150&fit=crop&crop=face',
+        rating: 4.9,
+        total_sales: 67
+      },
+      category: {
+        id: '5',
+        name: 'Typography'
       }
     }
   ]
