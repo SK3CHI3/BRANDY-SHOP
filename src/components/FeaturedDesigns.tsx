@@ -111,8 +111,15 @@ const FeaturedDesigns = () => {
   };
 
   return (
-    <section className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 relative overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-orange-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/3 left-1/4 w-80 h-80 bg-red-200/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-2/3 right-1/3 w-48 h-48 bg-pink-200/20 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-3">
             Featured Designs
@@ -139,7 +146,7 @@ const FeaturedDesigns = () => {
         {featuredLoading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-lg overflow-hidden animate-pulse">
+              <div key={i} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden animate-pulse">
                 <div className="aspect-square bg-gray-200"></div>
                 <div className="p-6 space-y-3">
                   <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -156,7 +163,7 @@ const FeaturedDesigns = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredProducts.map((product) => (
               <Link key={product.id} to={`/marketplace`} className="block group">
-                <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden relative">
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl border border-white/20 hover:border-white/30 transition-all duration-300 overflow-hidden relative hover:bg-white/90">
                   <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
                     {product.is_featured && (
                       <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
@@ -218,7 +225,7 @@ const FeaturedDesigns = () => {
                           </div>
                         ) : (
                           <div>
-                            <span className="text-lg font-bold text-purple-600">
+                            <span className="text-lg font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                               KSh {(product.license_price || product.price).toLocaleString()}
                             </span>
                             <div className="text-xs text-gray-500">
@@ -257,7 +264,7 @@ const FeaturedDesigns = () => {
                       ) : (
                         <>
                           <Button
-                            className="flex-1 bg-purple-600 hover:bg-purple-700"
+                            className="flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white shadow-md"
                             onClick={(e) => {
                               e.preventDefault();
                               handleContactArtist(product);
@@ -268,7 +275,7 @@ const FeaturedDesigns = () => {
                           </Button>
                           <Button
                             variant="outline"
-                            className="flex-1 hover:bg-purple-50 hover:border-purple-300"
+                            className="flex-1 border-2 border-orange-600 text-orange-600 hover:bg-orange-50 hover:border-orange-700 shadow-md"
                             onClick={(e) => {
                               e.preventDefault();
                               handleLicensePurchase(product);
@@ -287,13 +294,13 @@ const FeaturedDesigns = () => {
           </div>
         ) : (
           <div className="text-center py-12">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-24 h-24 bg-white/60 backdrop-blur-sm border border-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <ShoppingCart className="h-12 w-12 text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No featured products yet</h3>
             <p className="text-gray-600 mb-6">Check back soon for amazing designs from our artists!</p>
             <Link to="/marketplace">
-              <Button>Browse All Products</Button>
+              <Button className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white shadow-lg">Browse All Products</Button>
             </Link>
           </div>
         )}
@@ -301,13 +308,13 @@ const FeaturedDesigns = () => {
         <div className="text-center mt-10">
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link to="/marketplace">
-              <Button size="lg" variant="outline" className="border-2 border-orange-600 text-orange-600 hover:bg-orange-50 hover:border-orange-700 w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="border-2 border-orange-600 text-orange-600 hover:bg-orange-50 hover:border-orange-700 backdrop-blur-sm bg-white/60 w-full sm:w-auto shadow-lg">
                 <Palette className="h-5 w-5 mr-2" />
                 View All Designs
               </Button>
             </Link>
             <Link to="/request-quote">
-              <Button size="lg" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white w-full sm:w-auto">
+              <Button size="lg" className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white w-full sm:w-auto shadow-lg">
                 <Send className="h-5 w-5 mr-2" />
                 Request Quote
               </Button>
